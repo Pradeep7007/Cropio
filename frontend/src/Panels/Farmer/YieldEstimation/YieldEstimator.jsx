@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const baseUrl = import.meta.env.VITE_FARMER_API_URL;
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function YieldEstimator() {
   const [formData, setFormData] = useState({
@@ -30,7 +30,7 @@ export default function YieldEstimator() {
     setLoading(true);
     try {
       const res = await fetch(
-        "http://localhost:5000/api/farmer/yieldestimation/estimatedyield",
+        `${baseUrl}/api/farmer/yieldestimation/estimatedyield`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

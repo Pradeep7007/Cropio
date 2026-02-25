@@ -3,6 +3,8 @@ import SubsidyTabs from "../../../Components/Subsidies/SubsidyTabs";
 import Section from "../../../Components/Subsidies/Section";
 import Header from "../../../Components/Subsidies/Header";
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 export default function InsuranceLoans() {
   const [activeTab, setActiveTab] = useState("Crop Insurance");
   const [insurance, setInsurance] = useState([]);
@@ -31,17 +33,17 @@ export default function InsuranceLoans() {
     }
 
     fetchData(
-      "http://localhost:5000/api/farmer/governmentschemes/cropinsurances",
+      `${baseUrl}/api/farmer/governmentschemes/cropinsurances`,
       setInsurance,
       "cropinsurances"
     );
     fetchData(
-      "http://localhost:5000/api/farmer/governmentschemes/loans",
+      `${baseUrl}/api/farmer/governmentschemes/loans`,
       setLoans,
       "loans"
     );
     fetchData(
-      "http://localhost:5000/api/farmer/governmentschemes/subsidies",
+      `${baseUrl}/api/farmer/governmentschemes/subsidies`,
       setSubsidies,
       "subsidies"
     );

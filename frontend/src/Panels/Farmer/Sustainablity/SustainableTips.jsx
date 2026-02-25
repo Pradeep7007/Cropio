@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 export default function SustainableTips() {
   const [tips, setTips] = useState([]);
 
@@ -7,7 +9,7 @@ export default function SustainableTips() {
     const fetchTips = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/farmer/sustainableagriculture/sustainablepractices"
+          `${baseUrl}/api/farmer/sustainableagriculture/sustainablepractices`
         );
         const data = await res.json();
         console.log("Fetched sustainable tips:", data);

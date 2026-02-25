@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 const News = () => {
   // State for active tab and filters
   const [activeTab, setActiveTab] = useState("News");
@@ -13,7 +15,7 @@ const News = () => {
   useEffect(() => {
     const fetchTabContent = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/farmer/news/news");
+        const res = await fetch(`${baseUrl}/api/farmer/news/news`);
         const data = await res.json();
         setTabContent(data);
       } catch (error) {

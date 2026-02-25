@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import MarketFilter from "../../../Components/Market/MarketFilter";
 import MarketPlace from "../../../Components/Market/MarketPage";
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 export default function MarketplaceAccess() {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("All Products");
@@ -15,7 +17,7 @@ export default function MarketplaceAccess() {
     async function getData() {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/farmer/marketplace/marketdata"
+          `${baseUrl}/api/farmer/marketplace/marketdata`
         );
         const result = await response.json();
         console.log("Marketplace data fetched:", result);
