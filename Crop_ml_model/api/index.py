@@ -22,9 +22,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+
 # --- 3. Model Loading ---
-MODEL_FILE = 'model.pkl'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_FILE = os.path.join(BASE_DIR, 'model.pkl')
+
 try:
+    if not os.path.exists(MODEL_FILE):
+        raise FileNotFoundError(f"Model file not found at {MODEL_FILE}")
     with open(MODEL_FILE, 'rb') as file:
         model = pickle.load(file)
     print(f"✅ Model loaded successfully from: {MODEL_FILE}")
