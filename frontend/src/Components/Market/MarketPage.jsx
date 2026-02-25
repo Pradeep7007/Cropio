@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 const MarketPlace = ({ products }) => {
   const categories = ["All Products", "Grains", "Vegetables", "Fruits"];
   const [activeCategory, setActiveCategory] = useState("All Products");
@@ -69,7 +71,9 @@ const MarketPlace = ({ products }) => {
               </div>
               <div
                 className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                style={{ backgroundImage: `url(${image})` }}
+                style={{ 
+                  backgroundImage: `url(${image?.startsWith('http') ? image : `${baseUrl}${image}`})` 
+                }}
               />
             </div>
           </div>

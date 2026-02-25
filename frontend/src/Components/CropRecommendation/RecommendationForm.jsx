@@ -15,8 +15,8 @@ const RecommendationForm = ({ onRecommendationsReceived }) => {
         rainfall: 500
     });
   
-  // Base URL pointing to your FastAPI endpoint running on port 6000
-  const baseUrl = 'http://localhost:8000'; 
+  // Base URL pointing to your FastAPI endpoint
+  const baseUrl = import.meta.env.VITE_ML_API_URL || 'http://localhost:8000'; 
   const apiPath = '/api/farmer/croprecommendation/cropdata'; // Matches the FastAPI endpoint path
   
   const [loading, setLoading] = useState(false);

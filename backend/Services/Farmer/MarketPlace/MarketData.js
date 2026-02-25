@@ -8,7 +8,7 @@ module.exports = function MarketData (req,res) {
         delivery: "Available",
         category: "Grains",
         location: "USA",
-        image: "http://localhost:5000/images/wheat.jpg",
+        image: "/images/wheat.jpg",
       },
       {
         title: "Fresh Tomatoes",
@@ -18,7 +18,7 @@ module.exports = function MarketData (req,res) {
         delivery: "Available",
         category: "Vegetables",
         location: "Mexico",
-        image: "http://localhost:5000/images/tomato.jpg",
+        image: "/images/tomato.jpg",
       },
       {
         title: "Apples",
@@ -28,7 +28,7 @@ module.exports = function MarketData (req,res) {
         delivery: "Available",
         category: "Fruits",
         location: "USA",
-        image: "http://localhost:5000/images/apple.jpg",
+        image: "/images/apple.jpg",
       },
       {
         title: "Corn",
@@ -38,7 +38,7 @@ module.exports = function MarketData (req,res) {
         delivery: "Available",
         category: "Grains",
         location: "Mexico",
-        image: "http://localhost:5000/images/corn.jpg",
+        image: "/images/corn.jpg",
       },
     ];
     res.json(products);

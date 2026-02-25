@@ -106,7 +106,9 @@ const News = () => {
               >
                 <div
                   className="bg-center bg-cover rounded-lg size-[70px]"
-                  style={{ backgroundImage: `url('${item.img}')` }}
+                  style={{ 
+                    backgroundImage: `url('${item.img?.startsWith('http') ? item.img : `${baseUrl}${item.img}`}')` 
+                  }}
                 ></div>
                 <div className="flex flex-col">
                   <p className="text-base font-medium text-[#121b0e]">{item.title}</p>

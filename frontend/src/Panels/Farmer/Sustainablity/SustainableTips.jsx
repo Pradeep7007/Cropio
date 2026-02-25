@@ -50,7 +50,9 @@ export default function SustainableTips() {
                   >
                     <div
                       className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex flex-col"
-                      style={{ backgroundImage: `url(${tip.image})` }}
+                      style={{ 
+                        backgroundImage: `url(${tip.image?.startsWith('http') ? tip.image : `${baseUrl}${tip.image}`})` 
+                      }}
                     ></div>
                     <div>
                       <p className="text-[#131811] text-base font-medium leading-normal">
