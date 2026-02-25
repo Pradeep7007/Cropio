@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 
-// --- Note: Removed all categorical options arrays (Nitrogen, Phosporus, etc.)
-// --- as your model expects N, P, K, Temperature, Humidity, Ph, Rainfall as numbers.
-
 const RecommendationForm = ({ onRecommendationsReceived }) => {
   // State is now correctly set up for numerical input (as strings initially)
   const [formData, setFormData] = useState({
