@@ -1,60 +1,63 @@
 module.exports = function EstimatedYield(req, res) {
-    // Predefined yield data options
-    const yieldOptions = [
-        {
-            title: "High Wheat Yield",
-            description: "Your predicted wheat yield is significantly higher than the regional average. Factors: Loamy soil, Drip irrigation. Tips: Maintain fertilizer schedule. Confidence Score: 90%"
-        },
-        // {
-        //     title: "Moderate Rice Yield",
-        //     description: "Your predicted rice yield is slightly below the regional average. Factors: Clay soil, Flood irrigation. Tips: Improve water management. Confidence Score: 78%"
-        // },
-        // {
-        //     title: "Good Corn Yield",
-        //     description: "Your corn yield is expected to match the regional average. Factors: Sandy soil, Sprinkler irrigation. Tips: Consider crop rotation. Confidence Score: 85%"
-        // },
-        // {
-        //     title: "High Soybean Yield",
-        //     description: "Your soybean yield is above average. Factors: Loamy soil, Manual irrigation. Tips: Use disease-resistant seeds. Confidence Score: 88%"
-        // },
-        // {
-        //     title: "Low Barley Yield",
-        //     description: "Your barley yield is below average. Factors: Silt soil, Flood irrigation. Tips: Optimize fertilizer use. Confidence Score: 75%"
-        // },
-        // {
-        //     title: "Excellent Cotton Yield",
-        //     description: "Your cotton yield is very high. Factors: Peaty soil, Drip irrigation. Tips: Monitor soil moisture regularly. Confidence Score: 92%"
-        // },
-        // {
-        //     title: "Moderate Wheat Yield",
-        //     description: "Your wheat yield is close to the regional average. Factors: Clay soil, Sprinkler irrigation. Tips: Check soil nutrients. Confidence Score: 80%"
-        // },
-        // {
-        //     title: "High Rice Yield",
-        //     description: "Your rice yield is above average. Factors: Loamy soil, Drip irrigation. Tips: Optimize irrigation timing. Confidence Score: 89%"
-        // },
-        // {
-        //     title: "Low Corn Yield",
-        //     description: "Your corn yield is below average. Factors: Sandy soil, Manual irrigation. Tips: Improve soil fertility. Confidence Score: 72%"
-        // },
-        // {
-        //     title: "Good Barley Yield",
-        //     description: "Your barley yield matches the regional average. Factors: Silt soil, Sprinkler irrigation. Tips: Consider crop rotation. Confidence Score: 84%"
-        // },
-        // {
-        //     title: "High Cotton Yield",
-        //     description: "Your cotton yield is above average. Factors: Peaty soil, Flood irrigation. Tips: Use high-quality seeds. Confidence Score: 87%"
-        // },
-        // {
-        //     title: "Excellent Soybean Yield",
-        //     description: "Your soybean yield is very high. Factors: Loamy soil, Drip irrigation. Tips: Maintain proper spacing between plants. Confidence Score: 93%"
-        // }
-    ];
+    const { 
+        crop, 
+        landArea, 
+        soilType, 
+        waterAvailability, 
+        irrigationMethod, 
+        fertilizerUse,
+        farmingMethod 
+    } = req.body;
 
-    // Pick a random item
-    const randomIndex = Math.floor(Math.random() * yieldOptions.length);
-    const randomData = yieldOptions[randomIndex];
+    // Helper to calculate a base score from 0-100
+    let score = 70; // Start with a base score
+
+    // Soil weight
+    if (soilType === 'Loamy') score += 15;
+    if (soilType === 'Clay') score += 5;
+    if (soilType === 'Sandy') score -= 5;
+
+    // Water weight
+    if (waterAvailability === 'High') score += 10;
+    if (waterAvailability === 'Low' && irrigationMethod !== 'Drip') score -= 15;
+    if (waterAvailability === 'Low' && irrigationMethod === 'Drip') score -= 5;
+
+    // Farming method weight
+    if (farmingMethod === 'Organic') score += 5;
+    if (farmingMethod === 'Hydroponic') score += 12;
+
+    // Fertilizer weight
+    if (fertilizerUse === 'None') score -= 10;
+    if (fertilizerUse === 'Mixed') score += 8;
+
+    // Clamp score
+    score = Math.min(Math.max(score, 40), 98);
+
+    // Generate dynamic titles and descriptions
+    let title = "";
+    let description = "";
+
+    if (score > 85) {
+        title = `Excellent ${crop.charAt(0).toUpperCase() + crop.slice(1)} Forecast`;
+        description = `Your ${crop} yield is predicted to be exceptional (${score}% efficiency). The combination of ${soilType} soil and ${farmingMethod} practices is highly effective.`;
+    } else if (score > 70) {
+        title = `Strong ${crop.charAt(0).toUpperCase() + crop.slice(1)} Potential`;
+        description = `You can expect a solid harvest with around ${score}% yield efficiency. Your ${irrigationMethod} irrigation strategy is helping stabilize growth.`;
+    } else if (score > 55) {
+        title = `Moderate ${crop.charAt(0).toUpperCase() + crop.slice(1)} Growth`;
+        description = `Current predictions suggest a ${score}% efficiency. Consider optimizing ${fertilizerUse === 'None' ? 'fertilizer use' : 'water management'} to improve the outcome.`;
+    } else {
+        title = `Challenging ${crop.charAt(0).toUpperCase() + crop.slice(1)} Outlook`;
+        description = `Predicted yield is lower than average (${score}%). ${soilType} soil with ${waterAvailability} water availability presents some hurdles. Explore Drip irrigation.`;
+    }
+
+    const result = {
+        title,
+        description: `${description} Estimated production: ${(parseFloat(landArea || 1) * (score / 10)).toFixed(1)} tons. Confidence Score: ${score}%`,
+        efficiency: score
+    };
 
     // Send response
-    res.status(200).json(randomData);
+    res.status(200).json(result);
 };
+
