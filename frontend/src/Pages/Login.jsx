@@ -32,8 +32,8 @@ const LoginForm = () => {
       }}
     >
       <div className="flex h-full grow flex-col">
-        <div className="px-10 flex flex-1 justify-center py-5">
-          <div className="flex flex-col w-[512px] max-w-[960px] flex-1 py-5">
+        <div className="px-4 md:px-10 flex flex-1 justify-center py-5">
+          <div className="flex flex-col w-full max-w-[512px] flex-1 py-5">
             <h2 className="text-[#131811] text-[28px] font-bold leading-tight text-center pb-3 pt-5">
               Welcome back
             </h2>

@@ -4,8 +4,8 @@ export default function SubsidyTabs( { activeTab, setActiveTab }) {
   const tabs = ["Crop Insurance", "Loans", "Subsidies"];
 
   return (
-    <div className="pb-3">
-      <div className="flex border-b border-[#d7e7d0] px-4 gap-8">
+    <div className="pb-3 overflow-x-auto scrollbar-hide">
+      <div className="flex border-b border-[#d7e7d0] px-4 gap-4 md:gap-8 min-w-max">
         {tabs.map((tab) => (
           <button
             key={tab}

@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 const RecommendationForm = ({ onRecommendationsReceived }) => {
   // State is now correctly set up for numerical input (as strings initially)
   const [formData, setFormData] = useState({
-        nitrogen: 10,
-        phosphorus: 10,
+        nitrogen: 90,
+        phosphorus: 50,
         potassium: 10,
         temperature: 50,
         humidity: 90,

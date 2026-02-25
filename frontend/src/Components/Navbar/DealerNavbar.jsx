@@ -27,6 +27,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import SettingsIcon from "@mui/icons-material/Settings";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { Link } from "react-router-dom";
 
 // Icons map
@@ -77,13 +78,16 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
+})(({ theme, open, isMobile }) => ({
   zIndex: theme.zIndex.drawer + 1,
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  ...(open && {
+  backgroundColor: "#ffffff",
+  color: "#1a1a1a",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+  ...(!isMobile && open && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
@@ -93,7 +97,7 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const Drawer = styled(MuiDrawer, {
+const DesktopDrawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
   width: drawerWidth,
@@ -123,19 +127,16 @@ const menuItems = [
   { label: "Demand Supply Dashboard", path: "/demand-supply-dashboard" },
 ];
 
-// -----------------------------
-// ✅ Component Starts
-// -----------------------------
 export default function MiniDrawer() {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(false);
 
   const [userRole, setUserRole] = React.useState(localStorage.getItem("user") || "Farmer");
 
-  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerToggle = () => setOpen(!open);
   const handleDrawerClose = () => setOpen(false);
 
-  // 🔄 Listen for user role change events from Navbar or other components
   React.useEffect(() => {
     const syncUser = () => {
       const role = localStorage.getItem("user") || "Farmer";
@@ -145,85 +146,115 @@ export default function MiniDrawer() {
     return () => window.removeEventListener("userChanged", syncUser);
   }, []);
 
-  // 🧠 Handle switching user role manually from drawer
   const handleRoleChange = (role) => {
     setUserRole(role);
     localStorage.setItem("user", role);
-    window.dispatchEvent(new Event("userChanged")); // Notify Navbar or others
+    window.dispatchEvent(new Event("userChanged"));
   };
+
+  const drawerContent = (
+    <>
+      <DrawerHeader>
+        {!isMobile && (
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        )}
+        {isMobile && (
+          <Box sx={{ p: 2, fontWeight: 'bold', color: '#2e7d32', width: '100%', textAlign: 'left' }}>
+            Cropio Dealer
+          </Box>
+        )}
+      </DrawerHeader>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem key={item.label} disablePadding sx={{ display: "block" }}>
+            <ListItemButton
+              component={Link}
+              to={item.path}
+              onClick={isMobile ? handleDrawerClose : undefined}
+              sx={[
+                { minHeight: 48, px: 2.5 },
+                (!isMobile && open) ? { justifyContent: "initial" } : { justifyContent: "center" },
+              ]}
+            >
+              <ListItemIcon
+                sx={[
+                  { minWidth: 0, justifyContent: "center" },
+                  (!isMobile && open) ? { mr: 3 } : { mr: "auto" },
+                ]}
+              >
+                {menuIcons[item.label] || <InboxIcon />}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.label}
+                sx={(!isMobile && !open) ? { opacity: 0 } : { opacity: 1 }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <Box sx={{ textAlign: "center", py: 2 }}>
+        <button
+          onClick={() => handleRoleChange("Farmer")}
+          style={{
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            padding: "8px 16px",
+            cursor: "pointer",
+            fontWeight: 'bold'
+          }}
+        >
+          Switch to Farmer
+        </button>
+      </Box>
+    </>
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} isMobile={isMobile}>
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
-            onClick={handleDrawerOpen}
+            onClick={handleDrawerToggle}
             edge="start"
-            sx={[{ marginRight: 5 }, open && { display: "none" }]}
+            sx={[{ marginRight: 5 }, !isMobile && open && { display: "none" }]}
           >
             <MenuIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1, fontWeight: 'bold', fontSize: '1.2rem', color: '#2e7d32' }}>
+            Cropio
+          </Box>
+          <IconButton color="inherit">
+            <Box sx={{ width: 32, height: 32, bgcolor: '#e0e0e0', borderRadius: '50%' }} />
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-
-        {/* Menu Items */}
-        <List>
-          {menuItems.map((item) => (
-            <ListItem key={item.label} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                component={Link}
-                to={item.path}
-                sx={[
-                  { minHeight: 48, px: 2.5 },
-                  open ? { justifyContent: "initial" } : { justifyContent: "center" },
-                ]}
-              >
-                <ListItemIcon
-                  sx={[
-                    { minWidth: 0, justifyContent: "center" },
-                    open ? { mr: 3 } : { mr: "auto" },
-                  ]}
-                >
-                  {menuIcons[item.label] || <InboxIcon />}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  sx={[open ? { opacity: 1 } : { opacity: 0 }]}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-
-        {/* 🔘 Role display and switch */}
-        <Divider />
-        <Box sx={{ textAlign: "center", py: 2 }}>
-            <button
-              onClick={() => handleRoleChange("Farmer")}
-              style={{
-                backgroundColor: userRole === "Farmer" ? "#4CAF50" : "#E0E0E0",
-                color: userRole === "Farmer" ? "white" : "black",
-                border: "none",
-                borderRadius: "6px",
-                padding: "4px 8px",
-                cursor: "pointer",
-              }}
-            >
-              Farmer
-            </button>
-        </Box>
-      </Drawer>
+      {isMobile ? (
+        <MuiDrawer
+          variant="temporary"
+          open={open}
+          onClose={handleDrawerClose}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
+          }}
+        >
+          {drawerContent}
+        </MuiDrawer>
+      ) : (
+        <DesktopDrawer variant="permanent" open={open}>
+          {drawerContent}
+        </DesktopDrawer>
+      )}
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
@@ -231,3 +262,4 @@ export default function MiniDrawer() {
     </Box>
   );
 }
+
