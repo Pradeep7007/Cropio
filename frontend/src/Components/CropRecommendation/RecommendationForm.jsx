@@ -52,13 +52,16 @@ const RecommendationForm = ({ onRecommendationsReceived }) => {
     // --- End Validation ---
 
     try {
-      // NOTE: The URL MUST match the FastAPI route exactly
-      const response = await fetch(`${baseUrl}${apiPath}`, { 
+      // Sanitize URL: Remove trailing slash from baseUrl if it exists
+      const sanitizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+      const fullUrl = `${sanitizedBaseUrl}${apiPath}`;
+
+      const response = await fetch(fullUrl, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataToSend), // Sending the cleaned, numerical data
+        body: JSON.stringify(dataToSend), 
       });
       
       const result = await response.json();
@@ -76,7 +79,7 @@ const RecommendationForm = ({ onRecommendationsReceived }) => {
       }
     } catch (err) {
       // Catch network errors (CORS, server down, etc.)
-      setError('Network error: Could not connect to the API server. Ensure it is running on port 6000.');
+      setError('Network error: Could not connect to the ML API server. Verify that your VITE_ML_API_URL is correct in Vercel settings.');
       console.error('API Error:', err);
     } finally {
       setLoading(false);
