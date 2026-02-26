@@ -19,7 +19,7 @@ const MarketFilter = ({
   setMaxPrice,
 }) => {
   return (
-    <div className="layout-content-container flex flex-col w-80">
+    <div className="layout-content-container flex flex-col w-full lg:w-80">
       <div className="px-4 py-3">
         <label className="flex flex-col min-w-40 h-12 w-full">
               <input

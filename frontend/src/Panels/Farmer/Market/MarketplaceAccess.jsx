@@ -69,7 +69,7 @@ export default function MarketplaceAccess() {
         fontFamily: "Lexend, 'Noto Sans', sans-serif",
       }}
     >
-      <div className="layout-container flex h-full grow flex-row gap-6 px-6 py-5">
+      <div className="layout-container flex h-full grow flex-col lg:flex-row gap-6 px-6 py-5">
         <MarketFilter
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}

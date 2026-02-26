@@ -56,7 +56,7 @@ const MarketPlace = ({ products }) => {
       {filteredProducts.map(
         ({ title, available, quantity, price, delivery, image }) => (
           <div key={title} className="p-4">
-            <div className="flex items-stretch justify-between gap-4 rounded-xl">
+            <div className="flex flex-col sm:flex-row items-stretch justify-between gap-4 rounded-xl">
               <div className="flex flex-col gap-1 flex-[2_2_0px]">
                 <p className="text-[#67974e] text-sm font-normal leading-normal">
                   {available ? "Available" : "Unavailable"}
@@ -70,7 +70,7 @@ const MarketPlace = ({ products }) => {
                 </p>
               </div>
               <div
-                className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
+                className="w-full sm:w-48 bg-center bg-no-repeat aspect-video bg-cover rounded-xl"
                 style={{ 
                   backgroundImage: `url(${image?.startsWith('http') ? image : `${baseUrl}${image}`})` 
                 }}
