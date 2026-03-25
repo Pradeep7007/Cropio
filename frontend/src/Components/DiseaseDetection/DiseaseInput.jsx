@@ -61,7 +61,7 @@ const DiseaseInput = ({ onDetectionResult }) => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-lg">
+    <div className="p-4 sm:p-6 bg-white rounded-xl shadow-lg">
       <h2 className="text-xl font-bold text-[#131811] mb-4">Disease Detection</h2>
 
       <div className="space-y-4">
