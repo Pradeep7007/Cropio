@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 const RecommendationForm = ({ onRecommendationsReceived }) => {
   // State is now correctly set up for numerical input (as strings initially)
   const [formData, setFormData] = useState({
-        nitrogen: 90,
-        phosphorus: 50,
-        potassium: 10,
-        temperature: 50,
-        humidity: 90,
-        ph: 2.5,
-        rainfall: 500
-    });
+    nitrogen: "",
+    phosphorus: "",
+    potassium: "",
+    temperature: "",
+    humidity: "",
+    ph: "",
+    rainfall: ""
+});
   
   // Base URL pointing to your FastAPI endpoint
   const baseUrl = import.meta.env.VITE_ML_API_URL || 'http://localhost:8000'; 
