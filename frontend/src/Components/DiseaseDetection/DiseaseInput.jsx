@@ -41,16 +41,10 @@ const DiseaseInput = ({ onDetectionResult }) => {
       }
 
       // 2. Prediction
-      setLoadingMessage('Analyzing image with ML model...');
-      const prediction = await predictDisease(cropType);
+      setLoadingMessage('Analyzing image with PyTorch ML model...');
+      const prediction = await predictDisease(imageFile, category, cropType);
       
-      const resultData = {
-        crop: cropType,
-        category: category,
-        ...prediction
-      };
-      
-      onDetectionResult(resultData);
+      onDetectionResult(prediction);
     } catch (err) {
       setError(err.message || 'An unexpected error occurred during prediction.');
     } finally {
@@ -152,7 +146,7 @@ const DiseaseInput = ({ onDetectionResult }) => {
                 </span>
               ) : 'Run ML Diagnostics'}
             </button>
-            <p className="text-xs text-center text-gray-500 mt-3">Powered by Advanced Deep Learning</p>
+            <p className="text-xs text-center text-gray-500 mt-3">Powered by CropioAi</p>
           </div>
         </div>
       </div>
