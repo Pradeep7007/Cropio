@@ -1,5 +1,5 @@
 import React from 'react'
-import {Routes,Route, Router } from 'react-router-dom'
+import {Routes,Route, Router, Navigate } from 'react-router-dom'
 import FarmerDashboard from '../Pages/FarmerDashboard'
 import DiseaseDetection from '../Panels/Farmer/DiseasePrediction/DiseaseDetection'
 import CropRecommendation from '../Panels/Farmer/CropRecommendation/CropRecommendation'
@@ -18,7 +18,7 @@ const FarmerRoutes = () => {
     <div>
       <Routes>
         <Route path='/' element={<FarmerDashboard/>}/>
-        <Route path='/login' element={<LoginForm/>}/>
+        <Route path='/login' element={<Navigate to="/" replace />}/>
         <Route path='/dieseasedetection' element={<DiseaseDetection/>}/>
         <Route path='/croprecommendation' element={<CropRecommendation/>}/>
         <Route path='/cultivationguide' element={<CultivationGuide/>}/>

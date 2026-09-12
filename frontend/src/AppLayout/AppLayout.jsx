@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import FarmerRoutes from "../PublicRoutes/FarmerRoutes";
 import DealerRoutes from "../PublicRoutes/DealerRoutes";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer/Footer";
 import DealerNavbar from "../Components/Navbar/DealerNavbar";
 import LoginForm from "../Pages/Login";
+import RegisterForm from "../Pages/Register";
+import ForgotPassword from "../Pages/ForgotPassword";
 
 const AppLayout = () => {
-  const [loggedIn, setLoggedIn] = useState(() => localStorage.getItem("loggedIn") === "false");
-  const [user, setUser] = useState(() => localStorage.getItem("user") || "Farmer");
+  const [loggedIn, setLoggedIn] = useState(
+    () => localStorage.getItem("loggedIn") === "true"
+  );
+  const [user, setUser] = useState(
+    () => localStorage.getItem("user") || "Farmer"
+  );
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -28,7 +35,15 @@ const AppLayout = () => {
   }, []);
 
   if (!loggedIn) {
-    return <LoginForm />;
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/signup" element={<RegisterForm />} />
+        <Route path="/forgotpassword" element={<ForgotPassword />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
   return (

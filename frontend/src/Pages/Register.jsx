@@ -1,104 +1,310 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    role: "Farmer",
+    agreeTerms: false,
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleChange = (e) => {
+    const { name, type, value, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    if (error) setError("");
+  };
+
+  // Password strength calculation
+  const getPasswordStrength = (pass) => {
+    if (!pass) return { score: 0, text: "None", color: "#d9e1d6", width: "0%" };
+    let score = 0;
+    if (pass.length >= 6) score += 1;
+    if (pass.length >= 10) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+
+    if (score <= 2) {
+      return { score, text: "Weak", color: "#e53935", width: "33%" };
+    } else if (score <= 4) {
+      return { score, text: "Medium", color: "#fb8c00", width: "66%" };
+    } else {
+      return { score, text: "Strong", color: "#43a047", width: "100%" };
+    }
+  };
+
+  const strength = getPasswordStrength(formData.password);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!formData.name.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!formData.password) {
+      setError("Please enter a password.");
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match. Please re-enter.");
+      return;
+    }
+    if (!formData.agreeTerms) {
+      setError("Please agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const authUrl = import.meta.env.VITE_AUTH_API_URL || "http://localhost:5000/api/auth";
+      const response = await fetch(`${authUrl}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          phone: formData.phone.trim(),
+          role: formData.role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed. Please try again.");
+      }
+
+      setSuccess("Account created successfully! Redirecting to login...");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (err) {
+      setError(err.message || "Failed to connect to authentication server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div
       className="relative flex min-h-screen flex-col bg-[#fafbf9] overflow-x-hidden"
       style={{
         fontFamily: "Lexend, 'Noto Sans', sans-serif",
-        "--checkbox-tick-svg":
-          "url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(19,24,17)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e')",
-        "--select-button-svg":
-          "url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(109,133,96)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e')",
       }}
     >
-      <div className="flex h-full grow flex-col items-center justify-center px-6 py-8">
-        <div className="w-full max-w-xl py-5">
-          <h2 className="text-[#131811] text-[28px] font-bold text-center pb-3 pt-5">
-            Create your AgriWise account
-          </h2>
-          <p className="text-[#131811] text-base text-center px-4 pb-3">
-            Join our community of farmers and dealers to optimize your
-            agricultural practices and maximize your yields.
-          </p>
+      <div className="flex h-full grow flex-col items-center justify-center px-4 md:px-6 py-8">
+        <div className="w-full max-w-xl py-5 bg-white shadow-sm border border-[#e2e8e0] rounded-2xl p-6 md:p-8">
+          <div className="text-center pb-4">
+            <h2 className="text-[#131811] text-[28px] font-bold tracking-tight">
+              Create your Cropio account
+            </h2>
+            <p className="text-[#4b5563] text-sm md:text-base mt-2">
+              Join our community of farmers and dealers to optimize agricultural practices and maximize yields.
+            </p>
+          </div>
 
-          {[
-            { label: "Full Name", placeholder: "Enter your full name" },
-            { label: "Email Address", placeholder: "Enter your email address" },
-            { label: "Password", placeholder: "Create a password", type: "password" },
-            { label: "Confirm Password", placeholder: "Confirm your password", type: "password" },
-            { label: "Phone Number (Optional)", placeholder: "Enter your phone number" },
-          ].map(({ label, placeholder, type = "text" }, i) => (
-            <div className="px-4 py-3" key={i}>
-              <label className="flex flex-col w-full">
-                <p className="text-[#131811] text-base font-medium pb-2">
-                  {label}
-                </p>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center gap-2">
+              <span className="font-bold">⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl flex items-center gap-2">
+              <span className="font-bold">✅</span>
+              <span>{success}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="block text-[#131811] text-sm font-semibold mb-1">
+                Full Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
+                required
+              />
+            </div>
+
+            {/* Email Address */}
+            <div>
+              <label className="block text-[#131811] text-sm font-semibold mb-1">
+                Email Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email address"
+                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-[#131811] text-sm font-semibold mb-1">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Create a password (min. 6 characters)"
+                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
+                required
+              />
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-[#131811] text-sm font-semibold mb-1">
+                Confirm Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
+                required
+              />
+            </div>
+
+            {/* Password Strength Meter */}
+            {formData.password && (
+              <div className="p-3 bg-gray-50 rounded-xl border border-[#e8ece7]">
+                <div className="flex justify-between items-center text-xs font-medium text-[#131811] mb-1">
+                  <span>Password Strength:</span>
+                  <span style={{ color: strength.color }} className="font-bold">
+                    {strength.text}
+                  </span>
+                </div>
+                <div className="w-full bg-[#d9e1d6] h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full transition-all duration-300 rounded-full"
+                    style={{
+                      width: strength.width,
+                      backgroundColor: strength.color,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Phone Number */}
+            <div>
+              <label className="block text-[#131811] text-sm font-semibold mb-1">
+                Phone Number (Optional)
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Enter your phone number"
+                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
+              />
+            </div>
+
+            {/* User Type */}
+            <div>
+              <label className="block text-[#131811] text-sm font-semibold mb-1">
+                Account Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] focus:outline-none focus:border-green-600 transition"
+              >
+                <option value="Farmer">Farmer (Cultivation, Disease Detection, Advisory)</option>
+                <option value="Dealer">Dealer (Marketplace, Logistics, Price Forecasting)</option>
+                <option value="Researcher">Researcher</option>
+              </select>
+            </div>
+
+            {/* Terms Checkbox */}
+            <div className="pt-2">
+              <label className="flex items-start gap-3 cursor-pointer">
                 <input
-                  type={type}
-                  placeholder={placeholder}
-                  className="form-input w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] p-[15px] text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:ring-0 h-14"
+                  type="checkbox"
+                  name="agreeTerms"
+                  checked={formData.agreeTerms}
+                  onChange={handleChange}
+                  className="mt-1 h-4 w-4 rounded border-[#d9e1d6] text-green-600 focus:ring-green-500"
                 />
+                <span className="text-sm text-[#4b5563]">
+                  I agree to the <span className="text-green-700 underline">Terms of Service</span> and{" "}
+                  <span className="text-green-700 underline">Privacy Policy</span>.
+                </span>
               </label>
             </div>
-          ))}
 
-          {/* Password Strength */}
-          <div className="flex flex-col gap-3 p-4">
-            <div className="flex justify-between">
-              <p className="text-[#131811] text-base font-medium">
-                Password Strength
-              </p>
-            </div>
-            <div className="w-full bg-[#d9e1d6] rounded">
-              <div className="h-2 rounded bg-[#c5e0b7]" style={{ width: "60%" }} />
-            </div>
-            <p className="text-[#6d8560] text-sm">Medium</p>
-          </div>
-
-          {/* User Type */}
-          <div className="px-4 py-3">
-            <label className="flex flex-col w-full">
-              <p className="text-[#131811] text-base font-medium pb-2">
-                User Type
-              </p>
-              <select
-                className="form-input w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] p-[15px] text-base text-[#131811] bg-[image:var(--select-button-svg)] focus:outline-none focus:ring-0 h-14"
+            {/* Submit Button */}
+            <div className="pt-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full py-3.5 px-4 rounded-xl text-white font-bold text-base transition-all duration-200 shadow-sm ${
+                  loading
+                    ? "bg-green-400 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 active:scale-[0.99] cursor-pointer"
+                }`}
               >
-                <option value="">Select...</option>
-                <option value="farmer">Farmer</option>
-                <option value="dealer">Dealer</option>
-                <option value="researcher">Researcher</option>
-              </select>
-            </label>
-          </div>
+                {loading ? "Creating Account..." : "Create Account"}
+              </button>
+            </div>
+          </form>
 
-          {/* Terms Checkbox */}
-          <div className="px-4">
-            <label className="flex items-start gap-3 py-3">
-              <input
-                type="checkbox"
-                className="h-5 w-5 rounded border-[#d9e1d6] border-2 bg-transparent text-[#c5e0b7] checked:bg-[#c5e0b7] checked:border-[#c5e0b7] checked:bg-[image:var(--checkbox-tick-svg)] focus:ring-0 focus:outline-none"
-              />
-              <p className="text-[#131811] text-base">
-                I agree to the Terms of Service and Privacy Policy
-              </p>
-            </label>
+          {/* Login Link */}
+          <div className="mt-6 text-center text-sm text-[#4b5563] pt-4 border-t border-gray-100">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-green-700 font-semibold hover:underline hover:text-green-800"
+            >
+              Log in
+            </Link>
           </div>
-
-          {/* Submit Button */}
-          <div className="px-4 py-3">
-            <button className="w-full h-12 rounded-full bg-[#c5e0b7] text-[#131811] text-base font-bold">
-              Register
-            </button>
-          </div>
-
-          <p className="text-[#6d8560] text-sm text-center px-4 pt-1">
-            Already have an account?
-          </p>
-          <p className="text-[#6d8560] text-sm text-center px-4 underline">
-            Login
-          </p>
         </div>
       </div>
     </div>

@@ -111,10 +111,45 @@ const Navbar = () => {
           Switch to {user === "Farmer" ? "Dealer" : "Farmer"}
         </button>
 
-        {/* Notification and Profile */}
-        <div className="flex items-center space-x-4">
+        {/* Notification, User Profile, and Logout */}
+        <div className="flex items-center space-x-3">
           <button className="text-xl hover:text-green-600 transition-colors">🔔</button>
-          <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+          <div className="flex items-center space-x-2 pl-2 border-l border-gray-200">
+            <div className="w-8 h-8 rounded-full bg-green-100 text-green-800 font-bold flex items-center justify-center text-sm">
+              {(() => {
+                try {
+                  const obj = JSON.parse(localStorage.getItem("userObj"));
+                  return obj?.name ? obj.name.charAt(0).toUpperCase() : "U";
+                } catch {
+                  return "U";
+                }
+              })()}
+            </div>
+            <span className="text-sm font-medium text-gray-700 max-w-[120px] truncate">
+              {(() => {
+                try {
+                  const obj = JSON.parse(localStorage.getItem("userObj"));
+                  return obj?.name || "User";
+                } catch {
+                  return "User";
+                }
+              })()}
+            </span>
+          </div>
+
+          <button
+            onClick={() => {
+              localStorage.removeItem("loggedIn");
+              localStorage.removeItem("token");
+              localStorage.removeItem("userObj");
+              window.dispatchEvent(new Event("loggedInChanged"));
+              window.dispatchEvent(new Event("userChanged"));
+            }}
+            title="Log out"
+            className="text-xs px-2.5 py-1 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg font-medium transition cursor-pointer"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
@@ -161,7 +196,7 @@ const Navbar = () => {
             </div>
           </nav>
 
-          <div className="pt-4 border-t border-gray-200">
+          <div className="pt-4 border-t border-gray-200 space-y-3">
             <button
               onClick={() => {
                 handleSwitchRole();
@@ -171,12 +206,44 @@ const Navbar = () => {
             >
               Switch to {user === "Farmer" ? "Dealer" : "Farmer"}
             </button>
-            <div className="mt-6 flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-              <div>
-                <p className="font-bold">Ethan J.</p>
-                <p className="text-xs text-gray-500">View Profile</p>
+            <div className="mt-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-green-100 text-green-800 font-bold flex items-center justify-center">
+                  {(() => {
+                    try {
+                      const obj = JSON.parse(localStorage.getItem("userObj"));
+                      return obj?.name ? obj.name.charAt(0).toUpperCase() : "U";
+                    } catch {
+                      return "U";
+                    }
+                  })()}
+                </div>
+                <div>
+                  <p className="font-bold text-gray-800">
+                    {(() => {
+                      try {
+                        const obj = JSON.parse(localStorage.getItem("userObj"));
+                        return obj?.name || "User";
+                      } catch {
+                        return "User";
+                      }
+                    })()}
+                  </p>
+                  <p className="text-xs text-gray-500">{user}</p>
+                </div>
               </div>
+              <button
+                onClick={() => {
+                  localStorage.removeItem("loggedIn");
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("userObj");
+                  window.dispatchEvent(new Event("loggedInChanged"));
+                  window.dispatchEvent(new Event("userChanged"));
+                }}
+                className="text-sm px-3 py-1.5 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg font-medium"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>

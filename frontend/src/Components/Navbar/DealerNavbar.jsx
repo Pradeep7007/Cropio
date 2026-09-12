@@ -230,11 +230,52 @@ export default function MiniDrawer() {
             <MenuIcon />
           </IconButton>
           <Box sx={{ flexGrow: 1, fontWeight: 'bold', fontSize: '1.2rem', color: '#2e7d32' }}>
-            Cropio
+            Cropio <span style={{ fontSize: '0.85rem', color: '#666', fontWeight: 'normal' }}>| Dealer Portal</span>
           </Box>
-          <IconButton color="inherit">
-            <Box sx={{ width: 32, height: 32, bgcolor: '#e0e0e0', borderRadius: '50%' }} />
-          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#333' }}>
+              {(() => {
+                try {
+                  const obj = JSON.parse(localStorage.getItem("userObj"));
+                  return obj?.name || "Dealer";
+                } catch {
+                  return "Dealer";
+                }
+              })()}
+            </span>
+            <Box sx={{ width: 32, height: 32, bgcolor: '#c8e6c9', color: '#1b5e20', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
+              {(() => {
+                try {
+                  const obj = JSON.parse(localStorage.getItem("userObj"));
+                  return obj?.name ? obj.name.charAt(0).toUpperCase() : "D";
+                } catch {
+                  return "D";
+                }
+              })()}
+            </Box>
+            <button
+              onClick={() => {
+                localStorage.removeItem("loggedIn");
+                localStorage.removeItem("token");
+                localStorage.removeItem("userObj");
+                window.dispatchEvent(new Event("loggedInChanged"));
+                window.dispatchEvent(new Event("userChanged"));
+              }}
+              style={{
+                marginLeft: '8px',
+                padding: '4px 10px',
+                fontSize: '0.75rem',
+                color: '#d32f2f',
+                border: '1px solid #ffcdd2',
+                backgroundColor: '#ffebee',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Logout
+            </button>
+          </Box>
         </Toolbar>
       </AppBar>
 
