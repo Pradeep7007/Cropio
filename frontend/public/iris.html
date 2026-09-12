@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Python Codes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1b4332;
+            margin-bottom: 20px;
+        }
+
+        .main-action {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .btn-copy-all {
+            background-color: #1b4332;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-copy-all:hover {
+            background-color: #2d6a4f;
+            transform: translateY(-1px);
+        }
+
+        .btn-copy-all:active {
+            transform: scale(0.98);
+        }
+
+        .btn-copy-all.copied {
+            background-color: #52b788 !important;
+            color: #081c15 !important;
+        }
+
+        h2 {
+            background: #2d6a4f;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin-top: 30px;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .header-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            margin-top: 15px;
+        }
+
+        button.sub-btn {
+            background-color: #40916c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button.sub-btn:hover {
+            background-color: #2d6a4f;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: #1e1e1e;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 14px 20px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            font-size: 15px;
+            border: 1px solid #52b788;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.4s 2.2s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 10px; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 10px; opacity: 0;}
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Iris Machine Learning Programs</h1>
+
+    <!-- Single click button to copy BOTH codes -->
+    <div class="main-action">
+        <button id="btn-copy-both" class="btn-copy-all" onclick="copyBothCodes()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <span id="btn-both-text">Copy Both Codes (Single Click)</span>
+        </button>
+    </div>
+
+    <h2>1. Iris Multiclass Logistic Regression - OvR and Softmax</h2>
+
+    <div class="header-action">
+        <button class="sub-btn" onclick="copySingle('code1', 'Program 1')">Copy Code 1</button>
+    </div>
+
+<pre id="code1">import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+ovr = LogisticRegression(
+    solver='lbfgs', max_iter=1000, multi_class='ovr'
+)
+ovr.fit(X_train, y_train)
+
+softmax = LogisticRegression(
+    solver='lbfgs', max_iter=1000, multi_class='multinomial'
+)
+softmax.fit(X_train, y_train)
+
+y_pred = softmax.predict(X_test)
+
+report = classification_report(
+    y_test, y_pred,
+    target_names=iris.target_names,
+    output_dict=True
+)
+
+df = pd.DataFrame(report).T
+df.insert(0, 'sno', range(1, len(df) + 1))
+
+df = df[['sno', 'precision', 'recall', 'f1-score', 'support']]
+
+df.to_csv('submission.csv', index=False)
+
+print(classification_report(
+    y_test,
+    y_pred,
+    target_names=iris.target_names
+))</pre>
+
+
+    <h2>2. Iris Logistic Regression - Feature Coefficients</h2>
+
+    <div class="header-action">
+        <button class="sub-btn" onclick="copySingle('code2', 'Program 2')">Copy Code 2</button>
+    </div>
+
+<pre id="code2">import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+y = (y == 0).astype(int)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+model = LogisticRegression(
+    solver='lbfgs',
+    max_iter=1000
+)
+
+model.fit(X_train, y_train)
+
+coef = model.coef_[0].round(4)
+
+df = pd.DataFrame({
+    'Feature': iris.feature_names,
+    'Coefficients': coef
+})
+
+df.to_csv('submission.csv', index=False)
+
+print(df)</pre>
+
+</div>
+
+<div id="toast">Both codes copied to clipboard!</div>
+
+<script>
+function copyBothCodes() {
+    let code1 = document.getElementById('code1').innerText;
+    let code2 = document.getElementById('code2').innerText;
+    let combined = code1 + "\n\n\n" + code2;
+
+    performCopy(combined, () => {
+        let btn = document.getElementById('btn-copy-both');
+        let txt = document.getElementById('btn-both-text');
+        btn.classList.add('copied');
+        txt.innerText = "✓ Both Codes Copied to Clipboard!";
+        showToast("Both Codes copied to clipboard!");
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            txt.innerText = "Copy Both Codes (Single Click)";
+        }, 2500);
+    });
+}
+
+function copySingle(id, name) {
+    let code = document.getElementById(id).innerText;
+    performCopy(code, () => {
+        showToast(name + " copied to clipboard!");
+    });
+}
+
+function performCopy(text, onSuccess) {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(onSuccess).catch(() => {
+            fallbackCopy(text, onSuccess);
+        });
+    } else {
+        fallbackCopy(text, onSuccess);
+    }
+}
+
+function fallbackCopy(text, onSuccess) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        if (onSuccess) onSuccess();
+    } catch (err) {
+        alert("Failed to copy code. Please copy manually.");
+    }
+    document.body.removeChild(textArea);
+}
+
+function showToast(msg) {
+    let toast = document.getElementById("toast");
+    if (toast) {
+        toast.innerText = msg;
+        toast.className = "show";
+        setTimeout(() => {
+            toast.className = toast.className.replace("show", "");
+        }, 2500);
+    }
+}
+</script>
+
+</body>
+</html>

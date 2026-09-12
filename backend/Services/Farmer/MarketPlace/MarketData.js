@@ -215,6 +215,8 @@ const fetchFromDataGov = (url) => {
 module.exports = async function MarketData(req, res) {
   const {
     state,
+    district,
+    market,
     commodity,
     search,
     sortBy,
@@ -232,6 +234,12 @@ module.exports = async function MarketData(req, res) {
 
   if (state && state !== "All" && state !== "All States") {
     apiUrl += `&filters[state.keyword]=${encodeURIComponent(state)}`;
+  }
+  if (district && district !== "All" && district !== "All Districts") {
+    apiUrl += `&filters[district]=${encodeURIComponent(district)}`;
+  }
+  if (market && market !== "All" && market !== "All Markets") {
+    apiUrl += `&filters[market]=${encodeURIComponent(market)}`;
   }
   if (commodity && commodity !== "All" && commodity !== "All Products") {
     apiUrl += `&filters[commodity]=${encodeURIComponent(commodity)}`;
@@ -286,6 +294,16 @@ module.exports = async function MarketData(req, res) {
         item.state.toLowerCase().includes(state.toLowerCase())
       );
     }
+    if (district && district !== "All" && district !== "All Districts") {
+      filteredFallback = filteredFallback.filter((item) =>
+        item.district.toLowerCase().includes(district.toLowerCase())
+      );
+    }
+    if (market && market !== "All" && market !== "All Markets") {
+      filteredFallback = filteredFallback.filter((item) =>
+        item.market.toLowerCase().includes(market.toLowerCase())
+      );
+    }
     if (commodity && commodity !== "All" && commodity !== "All Products") {
       filteredFallback = filteredFallback.filter((item) =>
         item.commodity.toLowerCase().includes(commodity.toLowerCase())
@@ -307,34 +325,352 @@ module.exports = async function MarketData(req, res) {
     );
   }
 
-  // Apply Sorting
+  // Apply Sorting (price, commodity, district, market, date)
   if (sortBy === "price_desc") {
     results.sort((a, b) => b.modalPrice - a.modalPrice);
   } else if (sortBy === "price_asc") {
     results.sort((a, b) => a.modalPrice - b.modalPrice);
   } else if (sortBy === "commodity_asc") {
     results.sort((a, b) => a.commodity.localeCompare(b.commodity));
+  } else if (sortBy === "district_asc") {
+    results.sort((a, b) => a.district.localeCompare(b.district));
+  } else if (sortBy === "market_asc") {
+    results.sort((a, b) => a.market.localeCompare(b.market));
   } else if (sortBy === "date_desc") {
     results.sort((a, b) => (b.arrivalDate || "").localeCompare(a.arrivalDate || ""));
   }
 
-  // Also extract available unique filters for the frontend dropdowns
+  // State to District mapping
+  const stateDistrictsMap = {
+    "Tamil Nadu": [
+      "Madurai",
+      "Coimbatore",
+      "Chennai",
+      "Tiruchirappalli",
+      "Salem",
+      "Erode",
+      "Dindigul",
+      "Tirupur",
+      "Thanjavur",
+      "Vellore",
+      "Theni",
+      "Virudhunagar",
+      "Tirunelveli",
+      "Kanyakumari",
+      "Namakkal",
+      "Karur",
+      "Cuddalore",
+      "Dharmapuri",
+    ],
+    "Keralam": [
+      "Kozhikode(Calicut)",
+      "Kollam",
+      "Ernakulam",
+      "Thiruvananthapuram",
+      "Thrissur",
+      "Palakkad",
+      "Malappuram",
+      "Kannur",
+      "Kottayam",
+      "Alappuzha",
+      "Idukki",
+      "Wayanad",
+      "Kasaragod",
+      "Pathanamthitta",
+    ],
+    "Rajasthan": [
+      "Jalore",
+      "Jaipur",
+      "Jodhpur",
+      "Kota",
+      "Bikaner",
+      "Ajmer",
+      "Alwar",
+      "Sriganganagar",
+      "Udaipur",
+      "Bharatpur",
+      "Nagaur",
+      "Chittorgarh",
+      "Pali",
+      "Barmer",
+      "Sikar",
+    ],
+    "Punjab": [
+      "Ludhiana",
+      "Amritsar",
+      "Jalandhar",
+      "Patiala",
+      "Bathinda",
+      "Sangrur",
+      "Ferozepur",
+      "Hoshiarpur",
+      "Moga",
+      "Kapurthala",
+      "Faridkot",
+    ],
+    "Uttar Pradesh": [
+      "Agra",
+      "Kanpur",
+      "Lucknow",
+      "Varanasi",
+      "Prayagraj",
+      "Bareilly",
+      "Meerut",
+      "Aligarh",
+      "Moradabad",
+      "Saharanpur",
+      "Gorakhpur",
+      "Mathura",
+      "Bulandshahar",
+    ],
+    "Maharashtra": [
+      "Nashik",
+      "Pune",
+      "Nagpur",
+      "Ahmednagar",
+      "Solapur",
+      "Kolhapur",
+      "Aurangabad",
+      "Jalgaon",
+      "Satara",
+      "Amravati",
+      "Mumbai",
+      "Thane",
+      "Sangli",
+    ],
+    "Haryana": [
+      "Karnal",
+      "Ambala",
+      "Hisar",
+      "Rohtak",
+      "Panipat",
+      "Sonipat",
+      "Kurukshetra",
+      "Sirsa",
+      "Fatehabad",
+      "Yamunanagar",
+      "Gurgaon",
+    ],
+    "Gujarat": [
+      "Ahmedabad",
+      "Surat",
+      "Vadodara",
+      "Rajkot",
+      "Bhavnagar",
+      "Jamnagar",
+      "Junagadh",
+      "Amreli",
+      "Mehsana",
+      "Banaskantha",
+      "Kutch",
+    ],
+    "Karnataka": [
+      "Bengaluru",
+      "Mysuru",
+      "Belagavi",
+      "Hubballi-Dharwad",
+      "Kalaburagi",
+      "Ballari",
+      "Shivamogga",
+      "Tumakuru",
+      "Davangere",
+      "Kolar",
+      "Hassan",
+    ],
+    "Madhya Pradesh": [
+      "Bhopal",
+      "Indore",
+      "Jabalpur",
+      "Gwalior",
+      "Ujjain",
+      "Sagar",
+      "Dewas",
+      "Satna",
+      "Ratlam",
+      "Rewa",
+      "Mandsaur",
+    ],
+    "West Bengal": [
+      "Kolkata",
+      "Hooghly",
+      "Burdwan",
+      "North 24 Parganas",
+      "South 24 Parganas",
+      "Nadia",
+      "Murshidabad",
+      "Malda",
+      "Bankura",
+    ],
+    "Andhra Pradesh": [
+      "Guntur",
+      "Krishna",
+      "Visakhapatnam",
+      "East Godavari",
+      "West Godavari",
+      "Kurnool",
+      "Anantapur",
+      "Chittoor",
+      "Nellore",
+    ],
+    "Odisha": [
+      "Bhubaneswar",
+      "Cuttack",
+      "Sambalpur",
+      "Bargarh",
+      "Ganjam",
+      "Balasore",
+      "Puri",
+      "Mayurbhanj",
+    ],
+  };
+
+  const stateMarketsMap = {
+    "Tamil Nadu": [
+      "Usilampatti Market",
+      "Madurai APMC",
+      "Coimbatore APMC",
+      "Koyambedu Market",
+      "Ottanchathiram Market",
+      "Erode Market",
+      "Salem Market",
+      "Tirupur Mandi",
+    ],
+    "Keralam": [
+      "Mukkom Market",
+      "Sasthamkotta Market",
+      "Perumbavoor Market",
+      "Kollam Market",
+      "Kozhikode Market",
+      "Thrissur APMC",
+      "Alappuzha Market",
+    ],
+    "Rajasthan": [
+      "Jalore APMC",
+      "Jaipur Mandi",
+      "Muhana Mandi",
+      "Kota APMC",
+      "Jodhpur Mandi",
+      "Bikaner APMC",
+      "Sriganganagar Mandi",
+    ],
+    "Punjab": [
+      "Ludhiana APMC",
+      "Amritsar Mandi",
+      "Jalandhar Mandi",
+      "Khanna Mandi",
+      "Patiala Mandi",
+      "Bathinda Mandi",
+    ],
+    "Uttar Pradesh": [
+      "Fatehabad APMC",
+      "Agra Mandi",
+      "Lucknow Mandi",
+      "Kanpur APMC",
+      "Varanasi APMC",
+      "Meerut APMC",
+    ],
+    "Maharashtra": [
+      "Lasalgaon APMC",
+      "Vashi APMC",
+      "Pune APMC",
+      "Kalyan Mandi",
+      "Nashik APMC",
+      "Baramati APMC",
+      "Nagpur Mandi",
+    ],
+    "Gujarat": [
+      "Ahmedabad APMC",
+      "Surat APMC",
+      "Rajkot Mandi",
+      "Gondal APMC",
+      "Unjha APMC",
+    ],
+    "Karnataka": [
+      "Yeshwanthpur APMC",
+      "Kolar Mandi",
+      "Mysuru APMC",
+      "Hubli APMC",
+      "Belgaum APMC",
+    ],
+    "Haryana": [
+      "Karnal APMC",
+      "Panipat Mandi",
+      "Sirsa APMC",
+      "Hisar Mandi",
+      "Ambala Mandi",
+    ],
+    "Madhya Pradesh": [
+      "Indore APMC",
+      "Bhopal Mandi",
+      "Ujjain APMC",
+      "Neemuch Mandi",
+      "Mandsaur APMC",
+    ],
+    "West Bengal": [
+      "Kolkata Mandi",
+      "Siliguri APMC",
+      "Burdwan APMC",
+    ],
+    "Andhra Pradesh": [
+      "Guntur Market Yard",
+      "Vijayawada APMC",
+      "Tirupati Market",
+    ],
+    "Odisha": [
+      "Cuttack APMC",
+      "Bhubaneswar Market",
+      "Bargarh Regulated Market",
+    ],
+  };
+
   const availableStates = [
     "All States",
-    "Keralam",
-    "Rajasthan",
-    "Tamil Nadu",
-    "Punjab",
-    "Uttar Pradesh",
-    "Maharashtra",
-    "Haryana",
-    "Gujarat",
-    "Karnataka",
-    "Madhya Pradesh",
-    "West Bengal",
-    "Andhra Pradesh",
-    "Odisha",
+    ...Object.keys(stateDistrictsMap),
   ];
+
+  // If a specific state is chosen, only provide that state's districts and markets
+  let districtList = [];
+  let marketList = [];
+
+  const matchedStateKey = Object.keys(stateDistrictsMap).find(
+    (k) => state && state.toLowerCase() === k.toLowerCase()
+  );
+
+  // Include dynamic records seen in this batch
+  const dynamicDistricts = [...new Set(results.map((r) => r.district))].filter(
+    (d) => d && d !== "N/A"
+  );
+  const dynamicMarkets = [...new Set(results.map((r) => r.market))].filter(
+    (m) => m && m !== "N/A" && m !== "APMC Mandi"
+  );
+
+  let combinedDistricts = [];
+  let combinedMarkets = [];
+
+  if (matchedStateKey && stateDistrictsMap[matchedStateKey]) {
+    districtList = stateDistrictsMap[matchedStateKey];
+    marketList = stateMarketsMap[matchedStateKey] || [];
+    combinedDistricts = [
+      "All Districts",
+      ...new Set([...dynamicDistricts.filter((d) => districtList.includes(d)), ...districtList]),
+    ];
+    combinedMarkets = [
+      "All Markets",
+      ...new Set([...dynamicMarkets.filter((m) => marketList.includes(m)), ...marketList]),
+    ];
+  } else {
+    // Collect all districts and markets across all states
+    districtList = Object.values(stateDistrictsMap).flat();
+    marketList = Object.values(stateMarketsMap).flat();
+    combinedDistricts = [
+      "All Districts",
+      ...new Set([...dynamicDistricts, ...districtList]),
+    ];
+    combinedMarkets = [
+      "All Markets",
+      ...new Set([...dynamicMarkets, ...marketList]),
+    ];
+  }
 
   const availableCommodities = [
     "All Products",
@@ -366,7 +702,11 @@ module.exports = async function MarketData(req, res) {
     records: results,
     filterOptions: {
       states: availableStates,
+      districts: combinedDistricts,
+      markets: combinedMarkets,
       commodities: availableCommodities,
+      stateDistrictsMap,
+      stateMarketsMap,
     },
   });
 };

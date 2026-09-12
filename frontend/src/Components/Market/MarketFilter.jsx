@@ -6,6 +6,12 @@ const MarketFilter = ({
   selectedState,
   setSelectedState,
   stateOptions = [],
+  selectedDistrict,
+  setSelectedDistrict,
+  districtOptions = [],
+  selectedMarket,
+  setSelectedMarket,
+  marketOptions = [],
   selectedCommodity,
   setSelectedCommodity,
   commodityOptions = [],
@@ -78,7 +84,7 @@ const MarketFilter = ({
         </div>
       </div>
 
-      {/* Sort By */}
+      {/* Sort By (Price, District, Market, Commodity, Date) */}
       <div>
         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
           Sort Prices By
@@ -90,6 +96,8 @@ const MarketFilter = ({
         >
           <option value="price_desc">Modal Price: High to Low (₹↓)</option>
           <option value="price_asc">Modal Price: Low to High (₹↑)</option>
+          <option value="district_asc">District Wise: A → Z</option>
+          <option value="market_asc">Market / Mandi Wise: A → Z</option>
           <option value="commodity_asc">Commodity Name: A → Z</option>
           <option value="date_desc">Arrival Date: Latest First</option>
         </select>
@@ -98,7 +106,7 @@ const MarketFilter = ({
       {/* State Filter */}
       <div>
         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-          Select State / UT
+          State Filter
         </label>
         <select
           className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-green-600 transition cursor-pointer"
@@ -108,6 +116,42 @@ const MarketFilter = ({
           {stateOptions.map((st) => (
             <option key={st} value={st}>
               {st}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* District Filter */}
+      <div>
+        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          District Filter
+        </label>
+        <select
+          className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-green-600 transition cursor-pointer"
+          value={selectedDistrict}
+          onChange={(e) => setSelectedDistrict(e.target.value)}
+        >
+          {districtOptions.map((dist) => (
+            <option key={dist} value={dist}>
+              {dist}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Market Filter */}
+      <div>
+        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          Market / APMC Filter
+        </label>
+        <select
+          className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-green-600 transition cursor-pointer"
+          value={selectedMarket}
+          onChange={(e) => setSelectedMarket(e.target.value)}
+        >
+          {marketOptions.map((mkt) => (
+            <option key={mkt} value={mkt}>
+              {mkt}
             </option>
           ))}
         </select>
