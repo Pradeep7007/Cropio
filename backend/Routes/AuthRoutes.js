@@ -29,10 +29,10 @@ router.post("/register", async (req, res) => {
   try {
     const { name, email, password, phone, role } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required fields (name, email, password).",
+        message: "Please provide all required fields (name, email, password, phone number).",
       });
     }
 
@@ -40,6 +40,13 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Password must be at least 6 characters long.",
+      });
+    }
+
+    if (phone.trim().length < 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid phone number (at least 10 digits).",
       });
     }
 

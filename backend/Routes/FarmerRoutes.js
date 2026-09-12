@@ -72,7 +72,7 @@ router.post("/marketplace/marketpost",MarketPost);
 router.get("/news/mspupdates",MSPupdates);
 router.get("/news/news",News);
 router.get("/news/polices",Policies);
-router.get("news/schemes",Schemes);
+router.get("/news/schemes",Schemes);
 
 //Sustainalbe Agriculture
 router.get("/sustainableagriculture/sustainablepractices",SustainablePractices);

@@ -24,13 +24,6 @@ const Navbar = () => {
 
   const [user, setUser] = useState(() => localStorage.getItem("user") || "Farmer");
 
-  const handleSwitchRole = () => {
-    const newRole = user === "Farmer" ? "Dealer" : "Farmer";
-    setUser(newRole);
-    localStorage.setItem("user", newRole);
-    window.dispatchEvent(new Event("userChanged"));
-  };
-
   useEffect(() => {
     const syncUser = () => setUser(localStorage.getItem("user") || "Farmer");
     window.addEventListener("userChanged", syncUser);
@@ -103,13 +96,10 @@ const Navbar = () => {
           </div>
         </nav>
 
-        {/* 🔁 Role Switcher Button */}
-        <button
-          onClick={handleSwitchRole}
-          className="text-sm font-medium px-3 py-1 border border-green-600 text-green-600 rounded-full hover:bg-green-50 transition-colors"
-        >
-          Switch to {user === "Farmer" ? "Dealer" : "Farmer"}
-        </button>
+        {/* Role Badge */}
+        <span className="text-xs font-semibold px-3 py-1 bg-green-100 text-green-800 border border-green-300 rounded-full">
+          Farmer Account
+        </span>
 
         {/* Notification, User Profile, and Logout */}
         <div className="flex items-center space-x-3">
@@ -197,15 +187,9 @@ const Navbar = () => {
           </nav>
 
           <div className="pt-4 border-t border-gray-200 space-y-3">
-            <button
-              onClick={() => {
-                handleSwitchRole();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-center py-3 bg-green-600 text-white rounded-xl font-bold"
-            >
-              Switch to {user === "Farmer" ? "Dealer" : "Farmer"}
-            </button>
+            <div className="w-full text-center py-2 bg-green-50 text-green-800 border border-green-200 rounded-xl font-semibold text-sm">
+              Farmer Account
+            </div>
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-full bg-green-100 text-green-800 font-bold flex items-center justify-center">

@@ -1,44 +1,142 @@
-import React, { useState } from "react";
-import { newsData } from "./newsData";
+import React, { useState, useEffect } from "react";
+import { newsData as defaultNewsData } from "./newsData";
 
 const News = () => {
   const [activeTab, setActiveTab] = useState("News");
+  const [newsContent, setNewsContent] = useState(defaultNewsData);
+  const [loading, setLoading] = useState(false);
+  const [isLive, setIsLive] = useState(false);
+
   const tabs = ["News", "MSP Updates", "Policies", "Schemes"];
 
-  const renderNews = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {newsData["News"].map((item, index) => (
-        <div key={index} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
-          <div 
-            className="h-48 sm:h-auto sm:w-2/5 bg-cover bg-center"
-            style={{ backgroundImage: `url('${item.img}')` }}
-          />
-          <div className="p-6 sm:w-3/5 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wider">{item.category}</span>
-                <span className="text-gray-400 text-xs">{item.date}</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight">{item.title}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">{item.desc}</p>
-            </div>
-            <div className="text-sm font-medium text-green-600">Source: {item.source}</div>
+  const fetchLiveNews = async () => {
+    setLoading(true);
+    try {
+      const apiUrl =
+        import.meta.env.VITE_FARMER_API_URL || "http://localhost:5000/api/farmer";
+      const res = await fetch(`${apiUrl}/news/news`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.News && data.News.length > 0) {
+          setNewsContent((prev) => ({
+            ...prev,
+            ...data,
+          }));
+          setIsLive(true);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not fetch live news from backend, showing cached/default data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLiveNews();
+  }, []);
+
+  const renderNews = () => {
+    const articles = newsContent["News"] || [];
+
+    return (
+      <div className="space-y-6">
+        {/* Live Status Bar */}
+        <div className="flex flex-wrap items-center justify-between bg-green-50/80 border border-green-200 rounded-xl px-4 py-3 gap-3">
+          <div className="flex items-center gap-2 text-sm text-green-900 font-medium">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600"></span>
+            </span>
+            <span>
+              {isLive
+                ? "Live Agricultural News via @apitube/news-api"
+                : "Agricultural News Feed"}
+            </span>
           </div>
+          <button
+            onClick={fetchLiveNews}
+            disabled={loading}
+            className="text-xs font-semibold px-3 py-1.5 bg-white border border-green-300 text-green-700 hover:bg-green-100 rounded-lg transition shadow-sm cursor-pointer disabled:opacity-50"
+          >
+            {loading ? "Refreshing..." : "↻ Refresh Feed"}
+          </button>
         </div>
-      ))}
-    </div>
-  );
+
+        {/* News Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {articles.map((item, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden flex flex-col sm:flex-row group"
+            >
+              <div
+                className="h-48 sm:h-auto sm:w-2/5 bg-cover bg-center shrink-0 group-hover:scale-105 transition-transform duration-300"
+                style={{
+                  backgroundImage: `url('${
+                    item.img ||
+                    "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&auto=format&fit=crop"
+                  }')`,
+                }}
+              />
+              <div className="p-6 sm:w-3/5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wider">
+                      {item.category || "Agriculture"}
+                    </span>
+                    <span className="text-gray-400 text-xs">{item.date}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 leading-snug line-clamp-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                    {item.desc}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-50 text-xs">
+                  <span className="text-gray-500 font-medium truncate max-w-[150px]">
+                    Source: {item.source || "AgriTube"}
+                  </span>
+                  {item.url && item.url !== "#" ? (
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-green-700 hover:text-green-900 font-bold hover:underline inline-flex items-center gap-1"
+                    >
+                      Read Full Article ↗
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderMSP = () => {
-    const data = newsData["MSP Updates"];
+    const data = newsContent["MSP Updates"];
+    const tableData = Array.isArray(data) ? data[0]?.table || [] : data?.table || [];
+    const notification = Array.isArray(data)
+      ? data[0]?.notification || "Official MSP notifications for the current agricultural season."
+      : data?.notification;
+    const effectiveDate = Array.isArray(data)
+      ? data[0]?.effectiveDate || "Current Season"
+      : data?.effectiveDate;
+
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
         <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
           <h3 className="font-bold text-blue-900 mb-1">Official Notification</h3>
-          <p className="text-blue-800 text-sm">{data.notification}</p>
-          <p className="text-blue-600 text-sm font-bold mt-2">Effective Date: {data.effectiveDate}</p>
+          <p className="text-blue-800 text-sm">{notification}</p>
+          <p className="text-blue-600 text-sm font-bold mt-2">
+            Effective Date: {effectiveDate}
+          </p>
         </div>
-        
+
         <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -50,13 +148,25 @@ const News = () => {
               </tr>
             </thead>
             <tbody>
-              {data.table.map((row, idx) => (
+              {tableData.map((row, idx) => (
                 <tr key={idx} className="border-b hover:bg-gray-50 transition-colors">
                   <td className="p-4 font-medium text-gray-900">{row.crop}</td>
                   <td className="p-4 text-gray-600">₹{row.previousMsp}</td>
                   <td className="p-4 font-bold text-gray-900">₹{row.newMsp}</td>
                   <td className="p-4 font-bold text-green-600 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 10l7-7m0 0l7 7m-7-7v18"
+                      />
+                    </svg>
                     {row.increase}
                   </td>
                 </tr>
@@ -68,111 +178,199 @@ const News = () => {
     );
   };
 
-  const renderPolicies = () => (
-    <div className="space-y-6">
-      {newsData["Policies"].map((policy, index) => (
-        <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`px-3 py-1 text-xs font-bold rounded-full ${policy.type === 'Central Government' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
-              {policy.type}
-            </span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">{policy.title}</h3>
-          <p className="text-gray-600 leading-relaxed mb-6">{policy.summary}</p>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Key Benefits
-              </h4>
-              <p className="text-sm text-gray-600">{policy.benefits}</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                Eligibility
-              </h4>
-              <p className="text-sm text-gray-600">{policy.eligibility}</p>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderSchemes = () => (
-    <div className="space-y-8">
-      {newsData["Schemes"].map((scheme, index) => (
-        <div key={index} className="bg-white rounded-2xl shadow-sm border border-green-100 overflow-hidden">
-          <div className="bg-green-50 p-6 border-b border-green-100">
-            <h3 className="text-2xl font-bold text-green-900 mb-2">{scheme.title}</h3>
-            <p className="text-green-700">{scheme.description}</p>
-          </div>
-          
-          <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div>
-                <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Eligibility Criteria</h4>
-                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  {scheme.eligibility.map((item, i) => <li key={i}>{item}</li>)}
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Required Documents</h4>
-                <div className="flex flex-wrap gap-2">
-                  {scheme.documents.map((doc, i) => (
-                    <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-200">{doc}</span>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Application Process</h4>
-                <p className="text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-200">{scheme.process}</p>
-              </div>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="bg-yellow-50 p-5 rounded-xl border border-yellow-200">
-                <h4 className="font-bold text-yellow-900 mb-2">Benefits</h4>
-                <p className="text-yellow-800 text-sm font-medium">{scheme.benefits}</p>
-              </div>
-              
-              <div className="bg-red-50 p-5 rounded-xl border border-red-200">
-                <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  Important Deadline
-                </h4>
-                <p className="text-red-800 font-bold">{scheme.deadline}</p>
-              </div>
-              
-              <a 
-                href={scheme.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block w-full text-center bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 transition-colors shadow-md"
+  const renderPolicies = () => {
+    const policies = newsContent["Policies"] || [];
+    return (
+      <div className="space-y-6">
+        {policies.map((policy, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <span
+                className={`px-3 py-1 text-xs font-bold rounded-full ${
+                  policy.type === "Central Government"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-orange-100 text-orange-700"
+                }`}
               >
-                Apply / Official Portal
-              </a>
+                {policy.type || "Government Policy"}
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">{policy.title}</h3>
+            <p className="text-gray-600 leading-relaxed mb-6">{policy.summary}</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {policy.benefits && (
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-green-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Key Benefits
+                  </h4>
+                  <p className="text-sm text-gray-600">{policy.benefits}</p>
+                </div>
+              )}
+              {policy.eligibility && (
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-blue-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    Eligibility
+                  </h4>
+                  <p className="text-sm text-gray-600">{policy.eligibility}</p>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-  );
+        ))}
+      </div>
+    );
+  };
+
+  const renderSchemes = () => {
+    const schemes = newsContent["Schemes"] || [];
+    return (
+      <div className="space-y-8">
+        {schemes.map((scheme, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-2xl shadow-sm border border-green-100 overflow-hidden"
+          >
+            <div className="bg-green-50 p-6 border-b border-green-100">
+              <h3 className="text-2xl font-bold text-green-900 mb-2">{scheme.title}</h3>
+              <p className="text-green-700">{scheme.description}</p>
+            </div>
+
+            <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                {scheme.eligibility && (
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">
+                      Eligibility Criteria
+                    </h4>
+                    <ul className="list-disc list-inside space-y-2 text-gray-600">
+                      {scheme.eligibility.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {scheme.documents && (
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">
+                      Required Documents
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {scheme.documents.map((doc, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-200"
+                        >
+                          {doc}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {scheme.process && (
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">
+                      Application Process
+                    </h4>
+                    <p className="text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      {scheme.process}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-6">
+                {scheme.benefits && (
+                  <div className="bg-yellow-50 p-5 rounded-xl border border-yellow-200">
+                    <h4 className="font-bold text-yellow-900 mb-2">Benefits</h4>
+                    <p className="text-yellow-800 text-sm font-medium">
+                      {scheme.benefits}
+                    </p>
+                  </div>
+                )}
+
+                {scheme.deadline && (
+                  <div className="bg-red-50 p-5 rounded-xl border border-red-200">
+                    <h4 className="font-bold text-red-900 mb-2 flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Important Deadline
+                    </h4>
+                    <p className="text-red-800 font-bold">{scheme.deadline}</p>
+                  </div>
+                )}
+
+                {scheme.link && (
+                  <a
+                    href={scheme.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 transition-colors shadow-md"
+                  >
+                    Apply / Official Portal
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="relative flex min-h-screen flex-col bg-[#f9fcf8] overflow-x-hidden font-sans">
       <div className="layout-container flex h-full grow flex-col px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto w-full">
-        
         {/* Header */}
         <div className="mb-8 text-center sm:text-left">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4 tracking-tight">
             Agricultural <span className="text-green-600">News & Services</span>
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl">Stay updated with the latest market trends, government policies, MSP changes, and essential schemes designed to empower farmers.</p>
+          <p className="text-gray-600 text-lg max-w-2xl">
+            Stay updated with live agricultural headlines, market trends, government policies, MSP updates, and farmer welfare schemes.
+          </p>
         </div>
 
         {/* Tabs */}
@@ -199,7 +397,6 @@ const News = () => {
           {activeTab === "Policies" && renderPolicies()}
           {activeTab === "Schemes" && renderSchemes()}
         </div>
-
       </div>
     </div>
   );

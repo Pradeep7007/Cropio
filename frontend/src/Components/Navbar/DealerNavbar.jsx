@@ -146,11 +146,6 @@ export default function MiniDrawer() {
     return () => window.removeEventListener("userChanged", syncUser);
   }, []);
 
-  const handleRoleChange = (role) => {
-    setUserRole(role);
-    localStorage.setItem("user", role);
-    window.dispatchEvent(new Event("userChanged"));
-  };
 
   const drawerContent = (
     <>
@@ -197,20 +192,21 @@ export default function MiniDrawer() {
       </List>
       <Divider />
       <Box sx={{ textAlign: "center", py: 2 }}>
-        <button
-          onClick={() => handleRoleChange("Farmer")}
-          style={{
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            padding: "8px 16px",
-            cursor: "pointer",
-            fontWeight: 'bold'
+        <Box
+          sx={{
+            display: "inline-block",
+            bgcolor: "#e8f5e9",
+            color: "#2e7d32",
+            borderRadius: "16px",
+            px: 2,
+            py: 0.5,
+            fontSize: "0.8rem",
+            fontWeight: "bold",
+            border: "1px solid #c8e6c9"
           }}
         >
-          Switch to Farmer
-        </button>
+          Dealer Account
+        </Box>
       </Box>
     </>
   );

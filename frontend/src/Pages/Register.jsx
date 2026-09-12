@@ -13,6 +13,8 @@ const RegisterForm = () => {
     agreeTerms: false,
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -58,6 +60,14 @@ const RegisterForm = () => {
     }
     if (!formData.email.trim()) {
       setError("Please enter your email address.");
+      return;
+    }
+    if (!formData.phone.trim()) {
+      setError("Please enter your phone number.");
+      return;
+    }
+    if (formData.phone.trim().length < 10) {
+      setError("Phone number must be at least 10 digits.");
       return;
     }
     if (!formData.password) {
@@ -177,36 +187,90 @@ const RegisterForm = () => {
               />
             </div>
 
-            {/* Password */}
+            {/* Phone Number - Mandatory */}
             <div>
               <label className="block text-[#131811] text-sm font-semibold mb-1">
-                Password <span className="text-red-500">*</span>
+                Phone Number <span className="text-red-500">*</span>
               </label>
               <input
-                type="password"
-                name="password"
-                value={formData.password}
+                type="tel"
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
-                placeholder="Create a password (min. 6 characters)"
+                placeholder="Enter your 10-digit mobile number"
                 className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
                 required
               />
             </div>
 
-            {/* Confirm Password */}
+            {/* Password with Show/Hide */}
+            <div>
+              <label className="block text-[#131811] text-sm font-semibold mb-1">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Create a password (min. 6 characters)"
+                  className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] pl-4 pr-12 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-green-700 focus:outline-none p-1"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password with Show/Hide */}
             <div>
               <label className="block text-[#131811] text-sm font-semibold mb-1">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] pl-4 pr-12 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-green-700 focus:outline-none p-1"
+                  title={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Password Strength Meter */}
@@ -229,21 +293,6 @@ const RegisterForm = () => {
                 </div>
               </div>
             )}
-
-            {/* Phone Number */}
-            <div>
-              <label className="block text-[#131811] text-sm font-semibold mb-1">
-                Phone Number (Optional)
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="Enter your phone number"
-                className="w-full rounded-xl border border-[#d9e1d6] bg-[#fafbf9] px-4 py-3 text-sm md:text-base text-[#131811] placeholder-[#6d8560] focus:outline-none focus:border-green-600 transition"
-              />
-            </div>
 
             {/* User Type */}
             <div>
