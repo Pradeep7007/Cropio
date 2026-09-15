@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import FarmerRoutes from "../PublicRoutes/FarmerRoutes";
 import DealerRoutes from "../PublicRoutes/DealerRoutes";
 import Navbar from "../Components/Navbar/Navbar";
-import Footer from "../Components/Footer/Footer";
 import DealerNavbar from "../Components/Navbar/DealerNavbar";
 import LoginForm from "../Pages/Login";
 import RegisterForm from "../Pages/Register";
@@ -47,19 +46,15 @@ const AppLayout = () => {
   }
 
   return (
-    <>
-      <div className="sticky top-0 z-50 bg-white shadow-md">
-        {user === "Farmer" && <Navbar />}
-        {user === "Dealer" && <DealerNavbar />}
-      </div>
+    <div className="flex flex-col min-h-screen w-full bg-[#f8faf7] overflow-x-hidden">
+      {user === "Farmer" && <Navbar />}
+      {user === "Dealer" && <DealerNavbar />}
 
-      <div>
+      <main className="flex-1 w-full overflow-x-hidden">
         {user === "Farmer" && <FarmerRoutes />}
         {user === "Dealer" && <DealerRoutes />}
-      </div>
-
-      <Footer />
-    </>
+      </main>
+    </div>
   );
 };
 

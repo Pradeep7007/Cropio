@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { newsData as defaultNewsData } from "./newsData";
+
+const emptyNewsContent = {
+  News: [],
+  "MSP Updates": [],
+  Policies: [],
+  Schemes: [],
+};
 
 const News = () => {
   const [activeTab, setActiveTab] = useState("News");
-  const [newsContent, setNewsContent] = useState(defaultNewsData);
+  const [newsContent, setNewsContent] = useState(emptyNewsContent);
   const [loading, setLoading] = useState(false);
   const [isLive, setIsLive] = useState(false);
 
@@ -17,16 +23,13 @@ const News = () => {
       const res = await fetch(`${apiUrl}/news/news`);
       if (res.ok) {
         const data = await res.json();
-        if (data && data.News && data.News.length > 0) {
-          setNewsContent((prev) => ({
-            ...prev,
-            ...data,
-          }));
+        if (data) {
+          setNewsContent(data);
           setIsLive(true);
         }
       }
     } catch (err) {
-      console.warn("Could not fetch live news from backend, showing cached/default data:", err);
+      console.warn("Could not fetch live news from backend:", err);
     } finally {
       setLoading(false);
     }

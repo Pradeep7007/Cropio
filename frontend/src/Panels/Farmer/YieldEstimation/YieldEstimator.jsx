@@ -104,138 +104,161 @@ export default function YieldEstimator() {
 
   return (
     <div
-      className="relative flex min-h-screen flex-col bg-[#f9fcf8] group/design-root overflow-x-hidden"
+      className="min-h-screen bg-[#f8faf7] text-[#121b0e] py-6 sm:py-8 px-4 sm:px-6 lg:px-8"
       style={{ fontFamily: 'Lexend, "Noto Sans", sans-serif' }}
     >
-      <div className="layout-container flex h-full grow flex-col">
-        <main className="px-4 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
-          <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div className="flex flex-wrap justify-between gap-3 p-4">
-              <div>
-                <h1 className="text-[#121b0e] tracking-tight text-[32px] font-bold leading-tight">
-                  Smart Yield Estimator
-                </h1>
-                <p className="text-[#67974e] text-sm">
-                  Adjust the parameters below to see real-time yield predictions.
-                </p>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e2e8e0] shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2 border border-emerald-100">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              AI Agricultural Analytics
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+              Smart Yield Estimator
+            </h1>
+            <p className="text-gray-500 text-sm mt-1 max-w-xl">
+              Simulate cultivation parameters in real time to calculate potential harvest output and farming efficiency.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {loading ? (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 font-medium text-sm border border-emerald-200 animate-pulse">
+                <div className="w-2 h-2 bg-emerald-600 rounded-full animate-ping"></div>
+                Calculating Yield...
               </div>
-              {loading && (
-                <div className="flex items-center gap-2 text-green-600 font-medium animate-pulse">
-                  <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
-                  Calculating...
+            ) : (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 text-gray-600 font-medium text-xs border border-gray-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Realtime Sync Active
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Form Grid */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e2e8e0] shadow-sm mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <span className="w-2 h-5 bg-emerald-600 rounded-full"></span>
+            Farm & Soil Configuration Parameters
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {/* Crop Select */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                Target Crop
+              </label>
+              <select
+                name="crop"
+                value={formData.crop}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 px-4 py-3 text-sm font-medium transition-all shadow-sm outline-none"
+              >
+                <option value="wheat">Wheat</option>
+                <option value="rice">Rice</option>
+                <option value="corn">Corn</option>
+                <option value="soybean">Soybean</option>
+                <option value="barley">Barley</option>
+                <option value="cotton">Cotton</option>
+              </select>
+            </div>
+
+            {/* Land Area Input */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                Land Area (Acres)
+              </label>
+              <input
+                type="number"
+                name="landArea"
+                value={formData.landArea}
+                onChange={handleChange}
+                placeholder="e.g. 2.5"
+                min="0.1"
+                step="0.1"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 px-4 py-3 text-sm font-medium transition-all shadow-sm outline-none"
+              />
+            </div>
+
+            {/* Dynamic Selects */}
+            {Object.keys(options).map((key) => (
+              <div key={key} className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide capitalize">
+                  {key.replace(/([A-Z])/g, " $1")}
+                </label>
+                <select
+                  name={key}
+                  value={formData[key]}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 px-4 py-3 text-sm font-medium transition-all shadow-sm outline-none"
+                >
+                  {options[key].map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Yield Result Banner */}
+        <div 
+          className={`relative overflow-hidden rounded-3xl transition-all duration-500 shadow-lg ${loading ? 'opacity-75 scale-[0.99]' : 'opacity-100 scale-100'}`}
+          style={{
+            background: 'linear-gradient(135deg, #15803d 0%, #064e3b 100%)',
+          }}
+        >
+          {/* Subtle Glow circles */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-60 h-60 bg-emerald-400/10 rounded-full blur-2xl -ml-20 -mb-20 pointer-events-none"></div>
+
+          <div className="relative p-6 sm:p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex-1 space-y-3 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-emerald-100 text-xs font-semibold backdrop-blur-md">
+                <svg className="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Predicted Yield Analytics
+              </div>
+
+              {yieldData ? (
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    {yieldData.title}
+                  </h3>
+                  <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed mt-2 max-w-xl">
+                    {yieldData.description}
+                  </p>
+                </div>
+              ) : (
+                <div className="py-4">
+                  <p className="text-emerald-200 animate-pulse text-base">Analyzing agricultural metrics...</p>
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-              {/* Crop Select */}
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-bold text-[#121b0e] px-1">Select Crop</span>
-                <select
-                  name="crop"
-                  value={formData.crop}
-                  onChange={handleChange}
-                  className={inputClass}
-                >
-                  <option value="wheat">Wheat</option>
-                  <option value="rice">Rice</option>
-                  <option value="corn">Corn</option>
-                  <option value="soybean">Soybean</option>
-                  <option value="barley">Barley</option>
-                  <option value="cotton">Cotton</option>
-                </select>
-              </label>
-
-              {/* Land Area Input */}
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-bold text-[#121b0e] px-1">Land Area (Acres)</span>
-                <input
-                  type="number"
-                  name="landArea"
-                  value={formData.landArea}
-                  onChange={handleChange}
-                  placeholder="e.g. 2.5"
-                  className={inputClass}
-                />
-              </label>
-
-              {/* Dynamic Selects */}
-              {Object.keys(options).map((key) => (
-                <label key={key} className="flex flex-col gap-2">
-                  <span className="text-sm font-bold text-[#121b0e] px-1 capitalize">
-                    {key.replace(/([A-Z])/g, " $1")}
-                  </span>
-                  <select
-                    name={key}
-                    value={formData[key]}
-                    onChange={handleChange}
-                    className={inputClass}
-                  >
-                    {options[key].map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </div>
-
-            {/* Yield Result Section */}
-            <div className="p-4 mt-6">
-              <div 
-                className={`relative overflow-hidden rounded-3xl transition-all duration-500 shadow-xl ${loading ? 'opacity-70 scale-[0.98]' : 'opacity-100 scale-100'}`}
-                style={{
-                  background: 'linear-gradient(135deg, #1d4d0f 0%, #3a7a24 100%)',
-                  minHeight: '240px'
-                }}
-              >
-                {/* Decorative background elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-green-400/10 rounded-full -ml-10 -mb-10 blur-2xl"></div>
-
-                <div className="relative p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                      </div>
-                      <h2 className="text-white text-2xl font-bold tracking-tight">Predicted Yield Analysis</h2>
-                    </div>
-
-                    {yieldData ? (
-                      <div className="space-y-2">
-                        <h3 className="text-white text-xl font-semibold">{yieldData.title}</h3>
-                        <p className="text-white/80 text-base leading-relaxed max-w-lg">
-                          {yieldData.description}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-white/60 animate-pulse">Initialising estimator...</p>
-                    )}
-                  </div>
-
-                  {yieldData && yieldData.title !== "Error" && (
-                    <div className="flex flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 min-w-[200px]">
-                      <span className="text-white/70 text-sm uppercase tracking-widest font-bold mb-1">Estimated Efficiency</span>
-                      <div className="text-5xl font-black text-white">
-                        {yieldData.description.includes('%') ? yieldData.description.match(/(\d+)%/)[0] : '85%'}
-                      </div>
-                      <div className="mt-2 w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-white transition-all duration-1000" 
-                          style={{ width: yieldData.description.includes('%') ? yieldData.description.match(/(\d+)%/)[0] : '85%' }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
+            {yieldData && yieldData.title !== "Error" && (
+              <div className="flex flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 w-full sm:w-auto sm:min-w-[220px]">
+                <span className="text-emerald-200 text-xs uppercase tracking-widest font-bold mb-1">Estimated Efficiency</span>
+                <div className="text-5xl font-black text-white">
+                  {yieldData.description.includes('%') ? yieldData.description.match(/(\d+)%/)[0] : '85%'}
                 </div>
+                <div className="mt-3 w-full h-2 bg-white/20 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-emerald-300 transition-all duration-1000 rounded-full" 
+                    style={{ width: yieldData.description.includes('%') ? yieldData.description.match(/(\d+)%/)[0] : '85%' }}
+                  ></div>
+                </div>
+                <span className="text-white/70 text-xs mt-2 font-medium">Confidence Score: High</span>
               </div>
-            </div>
+            )}
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

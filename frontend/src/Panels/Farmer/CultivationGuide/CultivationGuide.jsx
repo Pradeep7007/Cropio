@@ -12,11 +12,13 @@ const CultivationGuide = () => {
     fetchCultivationGuide(selectedCrop);
     fetchCurrentStage();
   }, [selectedCrop]);
-  const baseUrl = import.meta.env.VITE_HOST;
+  const baseUrl =
+    import.meta.env.VITE_FARMER_API_URL || "http://localhost:5000/api/farmer";
+
   const fetchCultivationGuide = async (cropType) => {
     setLoading(true);
     try {
-      const response = await fetch(`${baseUrl}/user/sustainablity/cultivationguide/cropguide?cropType=${cropType}&location=general`);
+      const response = await fetch(`${baseUrl}/cultivationguide/cropguide?cropType=${cropType}&location=general`);
       const result = await response.json();
       
       if (result.success) {
@@ -33,9 +35,9 @@ const CultivationGuide = () => {
 
   const fetchCurrentStage = async () => {
     try {
-      // Mock planting date - in real app, this would come from user data
-      const plantingDate = '2024-06-15';
-      const response = await fetch(`${baseUrl}/user/sustainablity/cultivationguide/stageofcrop`, {
+      // Planting date approx 45 days ago
+      const plantingDate = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const response = await fetch(`${baseUrl}/cultivationguide/stageofcrop`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -58,7 +60,7 @@ const CultivationGuide = () => {
     if (!searchQuery.trim()) return;
     
     try {
-      const response = await fetch(`${baseUrl}/user/sustainablity/cultivationguide/searchcrops`, {
+      const response = await fetch(`${baseUrl}/cultivationguide/searchcrops`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

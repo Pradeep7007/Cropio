@@ -5,7 +5,9 @@ const SmartGuide = () => {
   const [cultivationHistory, setCultivationHistory] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const baseUrl = import.meta.env.VITE_HOST;
+  const baseUrl =
+    import.meta.env.VITE_FARMER_API_URL || "http://localhost:5000/api/farmer";
+
   useEffect(() => {
     if (activeTab === 'history') {
       fetchCultivationHistory();
@@ -17,14 +19,14 @@ const SmartGuide = () => {
   const fetchCultivationHistory = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${baseUrl}/user/sustainablity/cultivationguide/previouscultivated?farmerId=123&year=2023`);
+      const response = await fetch(`${baseUrl}/cultivationguide/previouscultivated?farmerId=123&year=2025`);
       const result = await response.json();
       
-      if (result.success) {
+      if (result.success && result.data?.cultivationHistory) {
         setCultivationHistory(result.data.cultivationHistory);
       }
     } catch (error) {
-      console.error('Failed to fetch cultivation history:', error);
+      console.warn('Using local cultivation history fallback:', error);
     } finally {
       setLoading(false);
     }
@@ -33,8 +35,7 @@ const SmartGuide = () => {
   const fetchSmartRecommendations = async () => {
     setLoading(true);
     try {
-      // Fetch recommendations based on current conditions
-      const response = await fetch(`${baseUrl}/user/sustainablity/croprecommendation/cropdata`, {
+      const response = await fetch(`${baseUrl}/croprecommendation/cropdata`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -48,11 +49,11 @@ const SmartGuide = () => {
       });
       
       const result = await response.json();
-      if (result.success) {
+      if (result.success && result.data?.recommendations) {
         setRecommendations(result.data.recommendations);
       }
     } catch (error) {
-      console.error('Failed to fetch recommendations:', error);
+      console.warn('Using smart recommendation fallback:', error);
     } finally {
       setLoading(false);
     }

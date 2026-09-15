@@ -81,4 +81,156 @@ router.get("/sustainableagriculture/sustainablepractices",SustainablePractices);
 router.post("/yieldestimation/cropyieldinput",CropYieldInput);
 router.post("/yieldestimation/estimatedyield",EstimatedYield);
 
+// --- Cultivated Crop Selling & Listings Endpoints ---
+const cropStore = require("../Services/Shared/cropListingsStore");
+
+// Get all active cultivated crop listings (Marketplace feed)
+router.get("/crops/listings", (req, res) => {
+  const { crop, state, search, status } = req.query;
+  const listings = cropStore.getAllListings({ crop, state, search, status });
+  res.json({ success: true, listings, count: listings.length });
+});
+
+// Get current farmer's listings and received dealer bids
+router.get("/crops/my-listings", (req, res) => {
+  const { farmerId, farmerPhone, farmerName } = req.query;
+  let myListings = [];
+  if (farmerId || farmerPhone || farmerName) {
+    myListings = cropStore.getFarmerListings(farmerId || farmerPhone, farmerName);
+  }
+  // If no user-specific listings match yet, return either the matched ones or the top listings as demo
+  res.json({
+    success: true,
+    listings: myListings,
+    allCount: cropStore.getAllListings().length
+  });
+});
+
+// Post new cultivated crop for sale
+router.post("/crops/sell", (req, res) => {
+  try {
+    const {
+      crop,
+      variety,
+      grade,
+      quantity,
+      unit,
+      askingPrice,
+      harvestStatus,
+      state,
+      district,
+      farmAddress,
+      notes,
+      farmerName,
+      farmerPhone,
+      farmerId,
+      image,
+    } = req.body;
+
+    if (!crop || !quantity || !askingPrice) {
+      return res.status(400).json({
+        success: false,
+        message: "Crop name, quantity, and asking price are required.",
+      });
+    }
+
+    const newListing = cropStore.createListing({
+      crop,
+      variety,
+      grade,
+      quantity,
+      unit,
+      askingPrice,
+      harvestStatus,
+      state,
+      district,
+      farmAddress,
+      notes,
+      farmerName,
+      farmerPhone,
+      farmerId,
+      image,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully listed ${quantity} ${unit || "Quintals"} of ${crop} for sale!`,
+      listing: newListing,
+    });
+  } catch (error) {
+    console.error("Error creating crop listing:", error);
+    res.status(500).json({ success: false, message: "Failed to publish crop listing." });
+  }
+});
+
+// Update listing status (e.g. "Sold" or "Available")
+router.patch("/crops/:id/status", (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!status) {
+    return res.status(400).json({ success: false, message: "Status is required." });
+  }
+  const updated = cropStore.updateListingStatus(id, status);
+  if (!updated) {
+    return res.status(404).json({ success: false, message: "Crop listing not found." });
+  }
+  res.json({ success: true, message: `Listing status updated to ${status}`, listing: updated });
+});
+
+// Approve dealer bid rate (Cultivator Authorization)
+router.post("/crops/bids/:bidId/approve", (req, res) => {
+  const { bidId } = req.params;
+  const { remarks } = req.body;
+  const result = cropStore.approveBid(bidId, remarks);
+  if (!result) {
+    return res.status(404).json({ success: false, message: "Dealer bid not found." });
+  }
+
+  res.json({
+    success: true,
+    message: `Bid rate of ₹${result.offer.offerPrice}/Q approved! The dealer is now authorized to buy this crop batch at this rate.`,
+    offer: result.offer,
+    listing: result.listing,
+  });
+});
+
+// Reject dealer bid rate
+router.post("/crops/bids/:bidId/reject", (req, res) => {
+  const { bidId } = req.params;
+  const { reason } = req.body;
+  const result = cropStore.rejectBid(bidId, reason);
+  if (!result) {
+    return res.status(404).json({ success: false, message: "Dealer bid not found." });
+  }
+
+  res.json({
+    success: true,
+    message: "Bid rate declined.",
+    offer: result.offer,
+    listing: result.listing,
+  });
+});
+
+// Delete crop listing
+router.delete("/crops/:id", (req, res) => {
+  const { id } = req.params;
+  const deleted = cropStore.deleteListing(id);
+  if (!deleted) {
+    return res.status(404).json({ success: false, message: "Crop listing not found." });
+  }
+  res.json({ success: true, message: "Crop listing removed successfully." });
+});
+
+// Get completed sell crops history directly from MongoDB Purchase collection
+router.get("/crops/sales-history", async (req, res) => {
+  try {
+    const { farmerName, farmerPhone } = req.query;
+    const history = await cropStore.getSalesHistory({ farmerName, farmerPhone });
+    res.json({ success: true, history, count: history.length });
+  } catch (err) {
+    console.error("Error fetching sales history from MongoDB:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch sales history from database." });
+  }
+});
+
 module.exports = router;

@@ -88,66 +88,165 @@ const RecommendationForm = ({ onRecommendationsReceived }) => {
 
   // Define the fields to render
   const numericalFields = [
-        { key: 'nitrogen', label: 'Nitrogen (N)', units: 'kg/ha' },
-        { key: 'phosphorus', label: 'Phosphorus (P)', units: 'kg/ha' },
-        { key: 'potassium', label: 'Potassium (K)', units: 'kg/ha' },
-        { key: 'temperature', label: 'Temperature', units: '°C' },
-        { key: 'humidity', label: 'Humidity', units: '%' },
-        { key: 'ph', label: 'Soil pH', units: '' },
-        { key: 'rainfall', label: 'Rainfall', units: 'mm' },
-    ];
+    { key: 'nitrogen', label: 'Nitrogen (N)', units: 'kg/ha', min: 0, max: 200, step: "any", desc: "Available mineral nitrogen in topsoil" },
+    { key: 'phosphorus', label: 'Phosphorus (P)', units: 'kg/ha', min: 0, max: 150, step: "any", desc: "Plant available soil phosphorus" },
+    { key: 'potassium', label: 'Potassium (K)', units: 'kg/ha', min: 0, max: 250, step: "any", desc: "Exchangeable potassium level" },
+    { key: 'temperature', label: 'Temperature', units: '°C', min: 0, max: 55, step: "0.1", desc: "Mean seasonal ambient temperature" },
+    { key: 'humidity', label: 'Relative Humidity', units: '%', min: 0, max: 100, step: "0.1", desc: "Average ambient moisture index" },
+    { key: 'ph', label: 'Soil pH', units: 'pH scale', min: 0, max: 14, step: "0.1", desc: "Acidity / Alkalinity level (neutral = 7.0)" },
+    { key: 'rainfall', label: 'Rainfall', units: 'mm', min: 0, max: 1000, step: "any", desc: "Annual or seasonal precipitation estimate" },
+  ];
+
+  const handleFillPreset = (presetType) => {
+    if (presetType === 'alluvial') {
+      setFormData({
+        nitrogen: "90",
+        phosphorus: "42",
+        potassium: "43",
+        temperature: "20.8",
+        humidity: "82.0",
+        ph: "6.5",
+        rainfall: "202.9"
+      });
+    } else if (presetType === 'black') {
+      setFormData({
+        nitrogen: "60",
+        phosphorus: "55",
+        potassium: "22",
+        temperature: "25.5",
+        humidity: "71.2",
+        ph: "7.8",
+        rainfall: "110.5"
+      });
+    } else if (presetType === 'coastal') {
+      setFormData({
+        nitrogen: "78",
+        phosphorus: "35",
+        potassium: "30",
+        temperature: "27.2",
+        humidity: "85.4",
+        ph: "6.2",
+        rainfall: "260.0"
+      });
+    }
+  };
 
   return (
-    <div>
-      <div className="w-full max-w-[960px]">
-        <div className="p-4">
-          <h1 className="text-[32px] font-bold text-[#131811]">Crop Recommendation Form</h1>
-          <p className="text-sm text-[#6d8560]">Provide details about your farm to receive AI-powered crop suggestions.</p>
-          {error && (
-            <div className="mt-2 p-3 bg-red-100 border border-red-300 rounded text-red-700">
-              {error}
-            </div>
-          )}
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e2e8e0] shadow-sm">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2 border border-emerald-100">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Machine Learning Recommender
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+            AI Crop Recommendation
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Input localized agro-climatic and soil chemistry indicators to identify the optimal crop for your farm.
+          </p>
         </div>
 
-        {/* Use <form> tag to allow for proper submission handling */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-          
-          {numericalFields.map(({ label, key, min, max, step, units }) => (
-            <div key={key} className="py-2">
-                <label className="flex flex-col">
-                <span className="text-base font-medium text-[#131811] pb-2">{label}</span>
-                <input
-                    type="number"
-                    name={key}
-                    value={formData[key]}
-                    onChange={handleChange(key)}
-                    className="h-14 p-4 rounded-xl bg-[#ecf0ea] text-base text-[#131811] focus:outline-none"
-                    placeholder={`Enter value for ${label}${units ? ` (${units})` : ''}`}
-                    min={min}
-                    max={max}
-                    step={step}
-                    required
-                />
+        {/* Quick Fill Presets */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-gray-500 mr-1">Quick Presets:</span>
+          <button
+            type="button"
+            onClick={() => handleFillPreset('alluvial')}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200"
+          >
+            Alluvial Soil
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFillPreset('black')}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200"
+          >
+            Black Soil
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFillPreset('coastal')}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200"
+          >
+            Coastal / Humid
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-700 text-sm">
+          <svg className="w-5 h-5 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {numericalFields.map(({ label, key, min, max, step, units, desc }) => (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                  {label}
                 </label>
+                {units && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">
+                    {units}
+                  </span>
+                )}
+              </div>
+              <input
+                type="number"
+                name={key}
+                value={formData[key]}
+                onChange={handleChange(key)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 px-4 py-3 text-sm font-medium transition-all shadow-sm outline-none"
+                placeholder={`Enter ${label.toLowerCase()}...`}
+                min={min}
+                max={max}
+                step={step}
+                required
+              />
+              <span className="text-[11px] text-gray-400 leading-tight">
+                {desc}
+              </span>
             </div>
           ))}
+        </div>
 
-          <div className="md:col-span-2 flex justify-end px-4 py-3">
-            <button
-              type="submit" // Set type to submit for form handling
-              className={`px-6 py-3 rounded text-white font-medium ${
-                loading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-green-600 hover:bg-green-700 cursor-pointer'
-              }`}
-              disabled={loading}
-            >
-              {loading ? 'Getting Recommendations...' : 'Get Recommendations'}
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-500">
+            Predictions are computed using trained agricultural decision models.
+          </p>
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white shadow-sm transition-all duration-200 ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-emerald-600/20 hover:shadow-lg"
+            }`}
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Analyzing Soil Chemistry...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Generate Crop Recommendation
+              </>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

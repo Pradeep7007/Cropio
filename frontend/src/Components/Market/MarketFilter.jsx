@@ -27,11 +27,21 @@ const MarketFilter = ({
   onRefresh,
   loading,
 }) => {
+  const [mobileExpanded, setMobileExpanded] = React.useState(false);
+  const activeFiltersCount = [
+    searchTerm ? 1 : 0,
+    selectedState !== "All States" ? 1 : 0,
+    selectedDistrict !== "All Districts" ? 1 : 0,
+    selectedMarket !== "All Markets" ? 1 : 0,
+    selectedCommodity !== "All Products" ? 1 : 0,
+    minPrice || maxPrice ? 1 : 0
+  ].reduce((a, b) => a + b, 0);
+
   return (
-    <div className="w-full lg:w-80 flex flex-col gap-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm shrink-0">
+    <div className="w-full lg:w-80 flex flex-col bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm shrink-0">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <svg
             className="w-5 h-5 text-green-600"
             fill="none"
@@ -45,19 +55,49 @@ const MarketFilter = ({
               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
             />
           </svg>
-          Mandi Filters
-        </h2>
-        <button
-          onClick={onReset}
-          className="text-xs text-green-700 hover:text-green-900 font-semibold cursor-pointer underline"
-        >
-          Reset All
-        </button>
+          <h2 className="text-base sm:text-lg font-bold text-gray-900">
+            Mandi Filters
+          </h2>
+          {activeFiltersCount > 0 && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              {activeFiltersCount}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-xs text-green-700 hover:text-green-900 font-semibold cursor-pointer underline"
+          >
+            Reset
+          </button>
+
+          {/* Mobile Accordion Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileExpanded(!mobileExpanded)}
+            className="lg:hidden p-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+            aria-label="Toggle Filters"
+          >
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${mobileExpanded ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Search Input */}
-      <div>
-        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+      {/* Filter Body: Collapsible on mobile, always open on lg */}
+      <div className={`flex flex-col gap-4 mt-4 ${mobileExpanded ? "block" : "hidden lg:flex"}`}>
+        {/* Search Input */}
+        <div>
+          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
           Search Commodity / Mandi
         </label>
         <div className="relative">
@@ -260,7 +300,8 @@ const MarketFilter = ({
         </button>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default MarketFilter;

@@ -11,6 +11,7 @@ import MarketplaceAccess from '../Panels/Farmer/Market/MarketplaceAccess'
 import InsuranceLoans from '../Panels/Farmer/Subsidies/InsuranceLoans'
 import YieldEstimator from '../Panels/Farmer/YieldEstimation/YieldEstimator'
 import CommunityForum from '../Panels/Farmer/Community/CommunityForum'
+import SellCrop from '../Panels/Farmer/SellCrop/SellCrop'
 import ForgotPassword from '../Pages/ForgotPassword'
 import LoginForm from '../Pages/Login'
 const FarmerRoutes = () => {
@@ -26,6 +27,7 @@ const FarmerRoutes = () => {
         <Route path='/dashboard' element={<SustainableDashboard/>}/>
         <Route path='/services/news' element={<News/>}/>
         <Route path='/services/market' element={<MarketplaceAccess/>}/>
+        <Route path='/services/sell-crop' element={<SellCrop/>}/>
         <Route path='/services/subsidy' element={<InsuranceLoans/>}/>
         <Route path='/services/yield-estimation' element={<YieldEstimator/>}/>
         <Route path='/services/community' element={<CommunityForum/>}/>
